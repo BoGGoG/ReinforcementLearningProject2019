@@ -56,6 +56,12 @@ class UnoEngine:
         # player 0 gets to start
         game_state['turn'] = 0
 
+        return {'turn': game_state['turn'],
+                'p_state': self.p_state(game_state['turn']),
+                'reward': 0,
+                'done': False
+                }
+
     def p_state(self, player):
         opponent = 1 if player == 0 else 0
         return {'open_card': self.game_state['open_card'],
@@ -76,31 +82,77 @@ class UnoEngine:
         if self.game_state['p_cards'][opponent].sum() < 1:
             reward = -100
             done = True
-            return self.p_state(player), reward, done
 
-        if not self.legal_cards()[card]:
-            print('illegal card!')
         # card = -1 indicates that the player draws a card
         elif card == -1:
             new_card = np.random.randint(self.n_cards)
             self.game_state['p_cards'][player][new_card] += 1
+            self.game_state['turn'] = opponent
+        elif not self.legal_cards()[card]:
+            print('illegal card!')
         elif self.game_state['p_cards'][player][card] < 1:
             print('you do not have this card!')
         else:
             self.game_state['p_cards'][player][card] -= 1
             self.game_state['open_card'] = card
 
-            if card[1] == 'd':
+            card_name = self.card_names[card]
+            if card_name[1] == 'd':
                 new_cards = np.random.randint(self.n_cards, size=2)
                 for c in new_cards:
                     self.game_state['p_cards'][opponent][c] += 1
 
-            if card[1] != 's':
+            if card_name[1] != 's':
                 self.game_state['turn'] = opponent
 
         if self.game_state['p_cards'][player].sum() < 1:
             reward = 100
             done = True
 
-        return self.p_state(player), reward, done
+        return {'turn': self.game_state['turn'],
+                'p_state': self.p_state(self.game_state['turn']),
+                'reward': reward,
+                'done': done
+                }
 
+    def text_step(self, card_name):
+        if card_name == '':
+            card = -1
+        else:
+            card = np.argwhere(self.card_names == card_name)[0, 0]
+        dic = self.step(card)
+        hand_cards = []
+        for c, n in enumerate(dic['p_state']['hand_cards']):
+            if n > 0:
+                hand_cards.append(str(int(n)) + ' ' + self.card_names[c])
+        hand_cards = ', '.join(hand_cards)
+
+        print()
+        print('Player {}:'.format(dic['turn']))
+        print('open card: ' + self.card_names[dic['p_state']['open_card']])
+        print('Hand Cards: ' + hand_cards)
+        print('Opponent has {} cards'.format(dic['p_state']['n_opponent_cards']))
+
+        return done
+
+    def text_reset(self):
+        dic = self.reset()
+        hand_cards = []
+        for c, n in enumerate(dic['p_state']['hand_cards']):
+            if n > 0:
+                hand_cards.append(str(int(n)) + ' ' + self.card_names[c])
+        hand_cards = ', '.join(hand_cards)
+        print()
+        print('Player {}:'.format(dic['turn']))
+        print('open card: ' + self.card_names[dic['p_state']['open_card']])
+        print('Hand Cards: ' + hand_cards)
+        print('Opponent has {} cards'.format(dic['p_state']['n_opponent_cards']))
+
+
+if __name__ == '__main__':
+    uno = UnoEngine()
+    uno.text_reset()
+    done = False
+    while not done:
+        card_name = input('Play card (leave empty to draw): ')
+        done = uno.text_step(card_name)
