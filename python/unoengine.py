@@ -88,6 +88,8 @@ class UnoEngine:
             new_card = np.random.randint(self.n_cards)
             self.game_state['p_cards'][player][new_card] += 1
             self.game_state['turn'] = opponent
+        elif card == -2:
+            print("This is a no nonsense affair, please only enter valid cards")        
         elif not self.legal_cards()[card]:
             print('illegal card!')
         elif self.game_state['p_cards'][player][card] < 1:
@@ -118,8 +120,11 @@ class UnoEngine:
     def text_step(self, card_name):
         if card_name == '':
             card = -1
-        else:
-            card = np.argwhere(self.card_names == card_name)[0, 0]
+        else:            
+            try:
+                card = np.argwhere(self.card_names == card_name)[0, 0]
+            except:
+                card=-2        
         dic = self.step(card)
         hand_cards = []
         for c, n in enumerate(dic['p_state']['hand_cards']):
