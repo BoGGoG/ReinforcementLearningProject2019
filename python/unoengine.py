@@ -7,7 +7,7 @@ class UnoEngine:
         # cards are coded by color (rygb) + number/special.
         # special cards: d: take 2, s: skip round
 
-        colors = ['r', 'y', 'g', 'b']
+        colors = ['R', 'Y', 'G', 'B']
         n_numbers = 8
         numbers = [str(i) for i in range(n_numbers)]
         specials = ['d', 's']
@@ -66,7 +66,7 @@ class UnoEngine:
         opponent = 1 if player == 0 else 0
         return {'open_card': self.game_state['open_card'],
                 'hand_cards': self.game_state['p_cards'][player],
-                'n_opponent_cards': self.game_state['p_cards'][opponent].sum()
+                'n_opponent_cards': int(self.game_state['p_cards'][opponent].sum())
                 }
 
     def legal_cards(self):
