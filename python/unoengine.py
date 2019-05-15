@@ -154,10 +154,31 @@ class UnoEngine:
         print('Opponent has {} cards'.format(dic['p_state']['n_opponent_cards']))
 
 
+def easyAdv(game):
+    player=1
+    hand=game.game_state['p_cards'][player]
+    legal=game.legal_cards()
+    for i in range(0,len(hand)):
+        if hand[int(i)]>0 and legal[i]:
+            cc= game.card_names[i]
+            return cc           
+    print("no card")
+    return ""
+
+            #break
+
 if __name__ == '__main__':
     uno = UnoEngine()
     uno.text_reset()
     done = False
     while not done:
-        card_name = input('Play card (leave empty to draw): ')
-        done = uno.text_step(card_name)
+        print("This is turn "+str(uno.game_state.get("turn")))
+        if uno.game_state.get('turn') == 0:
+            card_name = input('Play card (leave empty to draw): ')
+            done = uno.text_step(card_name)
+        else:
+            card=easyAdv(uno)
+            print(card)
+            done = uno.text_step(card)
+
+        
