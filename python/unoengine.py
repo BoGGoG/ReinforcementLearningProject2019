@@ -7,7 +7,7 @@ class UnoEngine:
         # cards are coded by color (rygb) + number/special.
         # special cards: d: take 2, s: skip round
 
-        colors = ['r', 'y', 'g', 'b']
+        colors = ['R', 'Y', 'G', 'B']
         n_numbers = 8
         numbers = [str(i) for i in range(n_numbers)]
         specials = ['d', 's']
@@ -66,7 +66,7 @@ class UnoEngine:
         opponent = 1 if player == 0 else 0
         return {'open_card': self.game_state['open_card'],
                 'hand_cards': self.game_state['p_cards'][player],
-                'n_opponent_cards': self.game_state['p_cards'][opponent].sum()
+                'n_opponent_cards': int(self.game_state['p_cards'][opponent].sum())
                 }
 
     def legal_cards(self):
@@ -88,6 +88,8 @@ class UnoEngine:
             new_card = np.random.randint(self.n_cards)
             self.game_state['p_cards'][player][new_card] += 1
             self.game_state['turn'] = opponent
+        elif card == -2:
+            print("This is a no nonsense affair, please only enter valid cards")        
         elif not self.legal_cards()[card]:
             print('illegal card!')
         elif self.game_state['p_cards'][player][card] < 1:
@@ -118,8 +120,11 @@ class UnoEngine:
     def text_step(self, card_name):
         if card_name == '':
             card = -1
-        else:
-            card = np.argwhere(self.card_names == card_name)[0, 0]
+        else:            
+            try:
+                card = np.argwhere(self.card_names == card_name)[0, 0]
+            except:
+                card=-2        
         dic = self.step(card)
         hand_cards = []
         for c, n in enumerate(dic['p_state']['hand_cards']):
