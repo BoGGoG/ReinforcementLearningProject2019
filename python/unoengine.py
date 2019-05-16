@@ -152,12 +152,47 @@ class UnoEngine:
         print('open card: ' + self.card_names[dic['p_state']['open_card']])
         print('Hand Cards: ' + hand_cards)
         print('Opponent has {} cards'.format(dic['p_state']['n_opponent_cards']))
+def easyAdv(game):
+    player=1
+    h=game.game_state['p_cards'][player]
+    legal=game.legal_cards()
+    cv=[]
+    for i in range(0,len(h)):
+        if h[int(i)]>0 and legal[i]:
+            cv.append(i)
+    #print("Available Options" + str(len(cv)))
+    if len(cv)== 0:
+        return -1
+    elif len(cv)==1:
+        return cv[0]
+    else:
+        j= np.random.randint(0,len(cv))
+        return cv[j]           
 
+
+def Translate(card,game):
+    if(card>-1)and card <game.n_cards:
+        return game.card_names[card]
+    elif card==-1:
+        return""
+    else:
+        print("The machine has rebelled")
+        return "quit"
 
 if __name__ == '__main__':
     uno = UnoEngine()
     uno.text_reset()
     done = False
     while not done:
-        card_name = input('Play card (leave empty to draw): ')
-        done = uno.text_step(card_name)
+        print("This is turn "+str(uno.game_state.get("turn")))
+        if uno.game_state.get('turn') == 0:
+            card_name = input('Play card (leave empty to draw): ')
+            done = uno.text_step(card_name)
+        else:
+            card=easyAdv(uno)
+            #print(card)
+            card=Translate(card,uno)
+            print(card)
+            done = uno.text_step(card)
+
+        
