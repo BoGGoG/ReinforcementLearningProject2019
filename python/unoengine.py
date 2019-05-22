@@ -82,7 +82,7 @@ class UnoEngine:
         if self.game_state['p_cards'][opponent].sum() < 1:
             reward = -100
             done = True
-
+#
         # card = -1 indicates that the player draws a card
         elif card == -1:
             new_card = np.random.randint(self.n_cards)
