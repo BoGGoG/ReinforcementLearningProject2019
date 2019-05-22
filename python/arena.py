@@ -5,7 +5,7 @@ class Arena:
         The Goal is that independent teams can create their own Agents and Games independently and still be able
         to use the other team's game. Also, duelling of different agents should be possible.
         :param agent_0: should subclass the Agent class
-        :param agent_1:
+        :param agent_1: " "
         :param game_env: should subclass the GameEnv class
         """
         self.agent_0 = agent_0
@@ -58,11 +58,14 @@ class Agent(object):
     def digest(self, game_info):
         """
         :param game_info: dictionary with the following entries:
-                        'turn': 0 or 1, whose turn it is
-                        'p_state': float array encoding the state of the game as viewed by the player who's 'turn' it is
-                        'legal_actions': boolean array encoding wich actions are legal
-                        'reward': float reward that the player receives as a result from HIS last turn
-                        'game_over': boolean weather the game is over or not
+
+                        'turn':             0 or 1, whose turn it is
+                        'p_state':          float array encoding the state ofthe game
+                                            as viewed by the player who's 'turn' it is
+                        'legal_actions':    boolean array encoding wich actions are legal
+                        'reward':           float reward that the player receives as a result from HIS last turn
+                        'game_over':        boolean weather the game is over or not
+
                         NOTE: History should be encoded within the p_state array
         :return: integer encoding the action the player takes or None if the game is over
         """
