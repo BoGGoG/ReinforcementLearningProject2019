@@ -1,6 +1,3 @@
-from abc import ABC
-
-
 class Arena:
     def __init__(self, agent_0, agent_1, game_env):
         """
@@ -55,7 +52,7 @@ class Arena:
             raise ValueError('agent {} attempted an illegal move'.format(self.game_info['turn']))
 
 
-class Agent(ABC):
+class Agent(object):
     """Agent that plays the game. May be human, random or a reinforcement learner.
     """
     def digest(self, game_info):
@@ -69,17 +66,17 @@ class Agent(ABC):
                         NOTE: History should be encoded within the p_state array
         :return: integer encoding the action the player takes or None if the game is over
         """
-        pass
+        raise NotImplementedError
 
 
-class GameEnv(ABC):
+class GameEnv(object):
     """Game environment that simulates the card game"""
     def reset(self):
         """
         reset the environment to begin a new game
         :return: game_info for the first turn. (see Agent class)
         """
-        pass
+        raise NotImplementedError
 
     def step(self, action):
         """
@@ -87,7 +84,7 @@ class GameEnv(ABC):
         :param action: integer encoding the action, or None if the game is over and there is not action to take
         :return: game_info for the next turn. (see Agent class)
         """
-        pass
+        raise NotImplementedError
 
     def get_state_dim(self):
         """
@@ -95,7 +92,7 @@ class GameEnv(ABC):
         to construct an agent
         :return: dimension of the array that encodes p_sate (see Agent class)
         """
-        pass
+        raise NotImplementedError
 
     def get_action_dim(self):
         """
@@ -103,6 +100,6 @@ class GameEnv(ABC):
         to construct an agent
         :return: number of possible actions (see Agent class)
         """
-        pass
+        raise NotImplementedError
 
 
