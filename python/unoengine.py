@@ -1,7 +1,8 @@
 import numpy as np
+from python.arena import GameEnv
 
 
-class UnoEngine:
+class UnoEngine(GameEnv):
     def __init__(self):
 
         # cards are coded by color (rygb) + number/special.
@@ -83,11 +84,11 @@ class UnoEngine:
         opponent = 1 if player == 0 else 0
 
         reward = 0
-        done = False
+        game_over = False
 
         if self.game_state['p_cards'][opponent].sum() < 1:
             reward = -100
-            done = True
+            game_over = True
 
         # card = -1 indicates that the player draws a card
         elif card == -1:
@@ -97,7 +98,7 @@ class UnoEngine:
         elif card == -2:
             print("This is a no nonsense affair, please only enter valid values")
         elif card == -3:
-            done=True
+            game_over=True
         elif not self.legal_cards()[card]:
             print('illegal card!'+str(card))
         elif self.game_state['p_cards'][player][card] < 1:
@@ -117,12 +118,12 @@ class UnoEngine:
 
         if self.game_state['p_cards'][player].sum() < 1:
             reward = 100
-            done = True
+            game_over = True
 
         return {'turn': self.game_state['turn'],
                 'p_state': self.p_state(self.game_state['turn']),
                 'reward': reward,
-                'done': done
+                'game_over': game_over
                 }
 
     def text_step(self, card_name):
