@@ -7,7 +7,7 @@ class UnoEngine:
         # cards are coded by color (rygb) + number/special.
         # special cards: d: take 2, s: skip round
 
-        colors = ['R', 'Y', 'G', 'B']
+        colors = ['r', 'y', 'g', 'b']
         n_numbers = 8
         numbers = [str(i) for i in range(n_numbers)]
         specials = ['d', 's']
@@ -70,7 +70,13 @@ class UnoEngine:
                 }
 
     def legal_cards(self):
-        return self.leg_matrix[self.game_state['open_card']]
+        try:
+            a=self.leg_matrix[self.game_state['open_card']]
+            return a
+        except:
+            print("Enter a valid Card please")
+            a = np.zeros((self.n_cards, self.n_cards), dtype=bool)
+        return a
 
     def step(self, card):
         player = self.game_state['turn']
@@ -89,9 +95,11 @@ class UnoEngine:
             self.game_state['p_cards'][player][new_card] += 1
             self.game_state['turn'] = opponent
         elif card == -2:
-            print("This is a no nonsense affair, please only enter valid cards")        
+            print("This is a no nonsense affair, please only enter valid values")
+        elif card == -3:
+            done=True
         elif not self.legal_cards()[card]:
-            print('illegal card!')
+            print('illegal card!'+str(card))
         elif self.game_state['p_cards'][player][card] < 1:
             print('you do not have this card!')
         else:
@@ -120,11 +128,13 @@ class UnoEngine:
     def text_step(self, card_name):
         if card_name == '':
             card = -1
-        else:            
+        elif card_name =="quit" or card_name=='q' or card_name =='^C':
+            card = np.argwhere(self.card_names == card_name)[0, 0]
+        else:
             try:
                 card = np.argwhere(self.card_names == card_name)[0, 0]
             except:
-                card=-2        
+                card=-2
         dic = self.step(card)
         hand_cards = []
         for c, n in enumerate(dic['p_state']['hand_cards']):
@@ -152,6 +162,24 @@ class UnoEngine:
         print('open card: ' + self.card_names[dic['p_state']['open_card']])
         print('Hand Cards: ' + hand_cards)
         print('Opponent has {} cards'.format(dic['p_state']['n_opponent_cards']))
+
+def easyAdvText(game):
+    player=1
+    h=game.game_state['p_cards'][player]
+    legal=game.legal_cards()
+    cv=[]
+    for i in range(0,len(h)):
+        if h[int(i)]>0 and legal[i]:
+            cv.append(game.card_names[i])
+    print(len(cv))
+    if cv == len(cv):
+        return ""
+    elif len(cv)==1:
+        return cv[0]
+    else:
+        i= np.random.randint(0,len(cv))
+        return cv[i]           
+
 def easyAdv(game):
     player=1
     h=game.game_state['p_cards'][player]
@@ -160,7 +188,7 @@ def easyAdv(game):
     for i in range(0,len(h)):
         if h[int(i)]>0 and legal[i]:
             cv.append(i)
-    #print("Available Options" + str(len(cv)))
+    print(len(cv))
     if len(cv)== 0:
         return -1
     elif len(cv)==1:
@@ -190,7 +218,7 @@ if __name__ == '__main__':
             done = uno.text_step(card_name)
         else:
             card=easyAdv(uno)
-            #print(card)
+            print(card)
             card=Translate(card,uno)
             print(card)
             done = uno.text_step(card)
