@@ -7,7 +7,7 @@ class UnoEngine:
         # cards are coded by color (rygb) + number/special.
         # special cards: d: take 2, s: skip round
 
-        colors = ['r', 'y', 'g', 'b']
+        colors = ['R', 'Y', 'G', 'B']
         n_numbers = 8
         numbers = [str(i) for i in range(n_numbers)]
         specials = ['d', 's']
