@@ -87,4 +87,20 @@ class GameEnv(ABC):
         """
         pass
 
+    def get_state_dim(self):
+        """
+        This function exists so that one does not need to know all details about the game environment in order
+        to construct an agent
+        :return: dimension of the array that encodes p_sate (see Agent class)
+        """
+        pass
+
+    def get_action_dim(self):
+        """
+        This function exists so that one does not need to know all details about the game environment in order
+        to construct an agent
+        :return: number of possible actions (see Agent class)
+        """
+        pass
+
 
