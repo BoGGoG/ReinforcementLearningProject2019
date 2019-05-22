@@ -4,7 +4,9 @@ from abc import ABC
 class Arena:
     def __init__(self, agent_0, agent_1, game_env):
         """
-        Framework to standardize game playing for two agents
+        Framework to standardize game playing for two agents.
+        The Goal is that independent teams can create their own Agents and Games independently and still be able
+        to use the other team's game. Also, duelling of different agents should be possible.
         :param agent_0: should subclass the Agent class
         :param agent_1:
         :param game_env: should subclass the GameEnv class
