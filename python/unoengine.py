@@ -91,7 +91,7 @@ class UnoEngine(GameEnv):
         legal_cards = self.leg_matrix[open_card] * self.game_state['p_cards'][player] > 0
         return np.append(legal_cards, True)  # append the draw action
 
-    def step(self, action):
+    def play(self, action):
         player = self.game_state['turn']
         opponent = 1 if player == 0 else 0
 
