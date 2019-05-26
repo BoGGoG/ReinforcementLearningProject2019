@@ -116,10 +116,10 @@ class GameEnv(object):
 
 
 if __name__ == '__main__':
-    """to random agents play one round against each other. The game is printed in textform
+    """two random agents play one round against each other. The game is printed in textform
     """
-    from python.unoengine import UnoEngine
-    from python.agents import RandomAgent
+    from unoengine import UnoEngine
+    from agents import RandomAgent
 
     unoengine = UnoEngine()
     agent_0 = RandomAgent(unoengine.get_action_dim())

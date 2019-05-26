@@ -1,5 +1,5 @@
 import numpy as np
-from python.arena import GameEnv
+from arena import GameEnv
 
 
 class UnoEngine(GameEnv):

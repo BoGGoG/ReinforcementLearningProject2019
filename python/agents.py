@@ -1,5 +1,5 @@
 import numpy as np
-from python.arena import Agent
+from arena import Agent
 
 
 class RandomAgent(Agent):
