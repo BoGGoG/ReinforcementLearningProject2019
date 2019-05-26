@@ -15,7 +15,7 @@ class Arena:
         self.game_info = self.game_env.reset()
 
         # when one player wins, the other still has to receive the game_info in the next step to receive the reward.
-        # we can reset the game only after both players received their rewards, so we need to kep track of for whom
+        # we can reset the game only after both players received their rewards, so we need to keep track of for whom
         # the game ended separately
         self.agent_0_done = False
         self.agent_1_done = False
@@ -25,7 +25,7 @@ class Arena:
 
     def step(self):
         """
-        Execute one step, i.e. wichever agent's turn it is receives his game info (see Agent class) and plays one card
+        Execute one step, i.e. whichever agent's turn it is receives his game info (see Agent class) and plays one card
         :return: nothing
         """
 
@@ -68,9 +68,9 @@ class Agent(object):
         :param game_info: dictionary with the following entries:
 
                         'turn':             0 or 1, whose turn it is
-                        'p_state':          float array encoding the state ofthe game
+                        'p_state':          float array encoding the state of the game
                                             as viewed by the player who's 'turn' it is
-                        'legal_actions':    boolean array encoding wich actions are legal
+                        'legal_actions':    boolean array encoding which actions are legal
                         'reward':           float reward that the player receives as a result from HIS last turn
                         'game_over':        boolean weather the game is over or not
 
@@ -116,7 +116,7 @@ class GameEnv(object):
 
 
 if __name__ == '__main__':
-    """to random agents play one round against each other. The game is printed in textform
+    """two random agents play one round against each other. The game is printed in textform
     """
     from unoengine import UnoEngine
     from agents import RandomAgent
@@ -129,37 +129,38 @@ if __name__ == '__main__':
 
     # main loop
     i = 0
-    finished = False
-    while not finished:
-        finished = (arena.agent_0_done and arena.agent_1_done)
+    for _ in range(3):
+        finished = False
+        while not finished:
+            finished = (arena.agent_0_done and arena.agent_1_done)
 
-        info = arena.game_info
-        player = info['turn']
-        open_card = unoengine.card_names[int(info['p_state'][-2])]
-        n_opponent_cards = info['p_state'][-1]
-        hand_cards = unoengine.get_card_names(info['p_state'][:-2])
-        game_over = info['game_over']
-        reward = info['reward']
+            info = arena.game_info
+            player = info['turn']
+            open_card = unoengine.card_names[int(info['p_state'][-2])]
+            n_opponent_cards = info['p_state'][-1]
+            hand_cards = unoengine.get_card_names(info['p_state'][:-2])
+            game_over = info['game_over']
+            reward = info['reward']
 
-        action = arena.step()
+            action = arena.step()
 
-        if game_over:
-            output = 'Player {} finishes with a reward of {}'.format(player, reward)
-        else:
-            if action >= unoengine.n_different_cards:
-                a_name = 'draws '
+            if game_over:
+                output = 'Player {} finishes with a reward of {}'.format(player, reward)
             else:
-                a_name = 'plays ' + unoengine.card_names[action] + ' '
+                if action >= unoengine.n_different_cards:
+                    a_name = 'draws '
+                else:
+                    a_name = 'plays ' + unoengine.card_names[action] + ' '
 
-            output = 'Step {:3}: '.format(i)
-            output += 'player {} '.format(player)
-            output += a_name
-            output += 'on ' + open_card + '. '
-            output += 'Hand cards before that: {' + hand_cards + '}. '
-            output += 'Number of opponents cards: {}'.format(n_opponent_cards) + '.'
+                output = 'Step {:3}: '.format(i)
+                output += 'player {} '.format(player)
+                output += a_name
+                output += 'on ' + open_card + '. '
+                output += 'Hand cards before that: {' + hand_cards + '}. '
+                output += 'Number of opponents cards: {}'.format(n_opponent_cards) + '.'
 
-        print(output)
-        i += 1
+            print(output)
+            i += 1
 
 
 

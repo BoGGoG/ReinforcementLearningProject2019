@@ -16,4 +16,4 @@ class RandomAgent(Agent):
         else:
             p = game_info['legal_actions'][:-1]
             p = p / p.sum()
-        return np.random.choice(self.action_dim-1, p=p)
+            return np.random.choice(self.action_dim-1, p=p)
