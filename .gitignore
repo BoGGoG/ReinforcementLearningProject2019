@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# tensorflow save files
+*.ckpt*
+
 # C extensions
 *.so
 
