@@ -6,11 +6,17 @@ import matplotlib.pyplot as plt
 import time
 print(tf.__version__)
 
-steps = 20
+steps = 100
 
-saveFilePath = "model.ckpt"
+useLongTrainedModel = False
+currentModelPath = "model.ckpt"
+longTrainedModelPath = 'trainedModel/model.ckpt'
+if useLongTrainedModel:
+    saveFilePath = longTrainedModelPath
+else:
+    saveFilePath = currentModelPath
 
-slippery = False
+slippery = True
 env = gym.make("FrozenLake-v0", map_name = "4x4", is_slippery = slippery)
 
 
@@ -24,6 +30,10 @@ W = tf.get_variable("W", shape = [16,4])
 Qout = tf.matmul(inputs1, W)
 predict = tf.argmax(Qout, 1)
 
+def printAction(action):
+    directions = ['left', 'down', 'right', 'up']
+    print('wanted next direction ' + directions[action])
+
 saver = tf.train.Saver()
 
 with tf.Session() as sess:
@@ -34,6 +44,7 @@ with tf.Session() as sess:
     for j in range(steps):
         action, allQ = sess.run([predict, Qout], feed_dict = {inputs1:np.identity(16)[state:state+1]})
         state, reward, done, _ = env.step(action[0])
+        printAction(action[0])
         env.render()
         print("reward: {}".format(reward))
         time.sleep(0.3)

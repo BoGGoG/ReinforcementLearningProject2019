@@ -27,8 +27,8 @@ slippery = False
 saveFilePath = "model.ckpt"
 gamma = .99
 epsilon = 0.1
-numEpisodes = 10000
-# numEpisodes = 20000
+# numEpisodes = 100000
+numEpisodes = 2000
 stepsPerEpisode = 200
 
 
@@ -81,7 +81,9 @@ with tf.Session() as sess:
             if done:
                 epsilon = 1. / ((i / 50.) + 10)
                 if reward != 1:
-                    reward = -5
+                    reward = -10 - j
+                elif reward == 1:
+                    reward = 50
                 break
         jList.append(j)
         rList.append(rAll)
