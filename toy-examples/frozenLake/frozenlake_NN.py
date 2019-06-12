@@ -68,6 +68,7 @@ with tf.Session() as sess:
         done = False
         for j in range(stepsPerEpisode):
             action, allQ = sess.run([predict, Qout], feed_dict = {inputs1:np.identity(16)[state:state+1]})
+            print(np.identity(16)[state:state+1])
             if np.random.rand(1) < epsilon:
                 action[0] = env.action_space.sample()
             state1, reward, done, _ = env.step(action[0])

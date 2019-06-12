@@ -172,11 +172,12 @@ if __name__ == '__main__':
     """two random agents play one round against each other. The game is printed in textform
     """
     from unoengine import UnoEngine
-    from agents import RandomAgent
+    from agents import RandomAgent, ReinforcementAgent
 
     # setup the arena
     unoengine = UnoEngine()
-    agent_0 = RandomAgent(unoengine.get_action_dim())
+    # agent_0 = RandomAgent(unoengine.get_action_dim())
+    agent_0 = ReinforcementAgent(unoengine.get_action_dim())
     agent_1 = RandomAgent(unoengine.get_action_dim())
 
     arena = Arena(agent_0, agent_1, unoengine)
