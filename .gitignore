@@ -6,6 +6,9 @@ __pycache__/
 # tensorflow save files
 *.ckpt*
 
+# data
+toy-examples/pytorch/data
+
 # C extensions
 *.so
 

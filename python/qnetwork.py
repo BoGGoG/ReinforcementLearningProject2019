@@ -14,6 +14,7 @@ class Qnetwork():
         self.weights = tf.get_variable("weights", shape = [inputLength, outputLength])
         self.qout = tf.matmul(self.inputPlaceholder, self.weights)
         predict = tf.argmax(self.qout, 1)
+        self.session = tf.Session()
 
 
 
