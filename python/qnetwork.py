@@ -1,21 +1,47 @@
-import tensorflow as tf
+# inspiration:
+# https://github.com/pytorch/examples/tree/master/reinforcement_learning
 
-class Qnetwork():
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.distributions import Categorical
+
+dropoutRate = 0.6
+hiddenLayerSize = 128
+
+class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
         """
         NOT IMPLEMENTED
-        Qnetwork for uno
+        Qnetwork for uno. Takes pState [0,1,0,0,2,...] as input and outputs probabilities (?).
         :param inputLength: Size of the state, every element of the vector means how many of this card the agent has
         :param outpuLength: Number of actions, i.e. number of different cards in the game
         """
+        super(Policy, self).__init__()
         self.inputLength = inputLength
         self.outputLength = outputLength
-        self.inputPlaceholder = tf.placeholder(shape = [1, inputLength], dtype=tf.float32)
-        self.weights = tf.get_variable("weights", shape = [inputLength, outputLength])
-        self.qout = tf.matmul(self.inputPlaceholder, self.weights)
-        predict = tf.argmax(self.qout, 1)
-        self.session = tf.Session()
+        self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
+        self.dropout = nn.Dropout(p = dropoutRate)
+        self.affine2 = nn.Linear(128, self.outputLength)
 
+        self.saved_log_probs = []
+        self.rewards = []
+
+    def forward(self, pState):
+        pState = torch.Tensor(pState)
+        pState = self.affine1(pState)
+        pState = self.dropout(pState)
+        pState = F.relu(pState)
+        action_scores = self.affine2(pState)
+        return F.softmax(action_scores, dim=0)
+
+    def selectAction(self, pState):
+        probs = self.forward(pState)
+        m = Categorical(probs)
+        action = m.sample()
+        self.saved_log_probs.append(m.log_prob(action))
+        return action.item()
 
 
 
