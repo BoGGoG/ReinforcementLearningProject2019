@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def imshow(img):
-    img = img / 2 + 0.5
+    img = img / 2. + 0.5
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
@@ -61,7 +61,7 @@ epochs = 2
 for epoch in range(epochs):
     print('epoch 1 / {}'.format(epochs))
     running_loss = 0.0
-    for datanum, data in tqdm(enumerate(trainloader)):
+    for datanum, data in tqdm(enumerate(trainloader, 0)):
         inputs, labels = data
         optimizer.zero_grad
         outputs = net(inputs)
@@ -70,7 +70,14 @@ for epoch in range(epochs):
         optimizer.step()
 
         running_loss += loss.item()
-        if datanum % 2000 == 1999:
+        if datanum % 2000 == 0:
             print('[%d, %5d] loss: %.3f' % (epoch + 1, datanum + 1, running_loss / 2000.))
             running_loss = 0.0
 print("Finished Training")
+
+
+dataiter = iter(testloader)
+images, labels = dataiter.next()
+
+imshot(torchvision.utils.make_grid(images))
+print('GroundTruth: ', ' '.join('%5s' %classes[labels[j]] for j in range(4)))
