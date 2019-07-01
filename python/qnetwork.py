@@ -48,7 +48,7 @@ class Policy(nn.Module):
         "returns action with largest log probability"
         probs = self.forward(pState)
         m = Categorical(probs)
-        logProbsArray = [m.log_prob(torch.Tensor([i])).item() for i in range(49)]
+        logProbsArray = [m.log_prob(torch.Tensor([i])).item() for i in range(self.outputLength)]
         return np.argmax(logProbsArray)
 
 
