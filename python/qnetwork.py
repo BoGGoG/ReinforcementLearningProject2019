@@ -13,15 +13,14 @@ hiddenLayerSize = 128
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
-        """
-        NO LEARNING IMPLEMENTED
+        """NO LEARNING IMPLEMENTED
         ToDO:
         - check if legal move
         - only output legal move
         - reinforcement learning
         Qnetwork for uno. Takes pState [0,1,0,0,2,...] as input and outputs probabilities (?).
-        :param inputLength: Size of the state, every element of the vector means how many of this card the agent has
-        :param outpuLength: Number of actions, i.e. number of different cards in the game
+        :param inputLength: state dimension: all cards + 'draw'
+        :param outpuLength: action dimension: all cards, open card, opponents hand cards =usually  inputLength + 1
         """
         super(Policy, self).__init__()
         self.inputLength = inputLength
@@ -43,27 +42,64 @@ class Policy(nn.Module):
         return F.softmax(action_scores, dim=0)
 
     def sampleAction(self, game_info):
+        """Returns sample action from categorical distribution of NN output
+        Before evaluation checks if there is a legal action except drawing
+        """
+
+        if hasToDraw(game_info['legal_actions']):
+            print("Policy NN: agent can only draw, not even evaluating. Returning 'draw' action ")
+            return self.outputLength - 1
         probs = self.forward(game_info)
         m = Categorical(probs)
-        action = m.sample()
+        legalAction = False
+        while not(legalAction):
+            "possible endless loop?"
+            action = m.sample()
+            legalAction = isLegalAction(action, game_info['legal_actions'])
+
         self.saved_log_probs.append(m.log_prob(action))
         return action.item()
 
     def greedyAction(self, game_info):
-        "returns action with largest log probability"
+        """returns action with largest log probability
+        Before evaluation checks if there is a legal action except drawing
+        """
+
+        if hasToDraw(game_info['legal_actions']):
+            print("Policy NN: agent can only draw, not even evaluating. Returning 'draw' action ")
+            return self.outputLength - 1
         probs = self.forward(game_info)
         m = Categorical(probs)
-        logProbsArray = [m.log_prob(torch.Tensor([i])).item() for i in range(self.outputLength)]
-        return np.argmax(logProbsArray)
+        logProbsArray = [[i, m.log_prob(torch.Tensor([i])).item()] for i in range(self.outputLength)]
+        # sort by decresing log probability
+        logProbsArray = sorted(logProbsArray, key = lambda tup: tup[1], reverse = True) 
+        legalAction = False
+        i = 0
+        while not(legalAction):
+            action = logProbsArray[i][0]
+            legalAction = isLegalAction(action, game_info['legal_actions'])
+            i += 1
+
+        return action
 
 def isLegalAction(action, legalActions):
-    """
-    Check if the action is legal.
+    """Check if the action is legal.
     :param action: Int
     :param legalityMatrix
     :return: true/false
     """
     return legalActions[action]
+
+def hasToDraw(legalActions):
+    """Check if legal action except drawing exists
+    :param legalityMatrix
+    :return: true/false
+    """
+    if legalActions.sum() <= 1:  # can only draw
+        return True
+    else:
+        return False
+
 
 
 

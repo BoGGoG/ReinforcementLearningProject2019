@@ -3,16 +3,19 @@ import numpy as np
 import sys
 sys.path.append("..")
 sys.path.append(".")
-from qnetwork import Policy, isLegalAction
+from qnetwork import Policy, isLegalAction, hasToDraw
 from arena import Arena, Agent
 from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 
-TEST_QNETWORK = False
+TEST_QNETWORK = True
 TEST_AGENT = True
 TEST_ARENA = True
+TEST_GREEDY = True
 
 """
+Those tests are not full unit tests, but just some production tests that should work
+after every change.
 We build a neural network with input size 50 and output size 49,
 since there is also the open card and number of opponents hand cards in the input,
 but only all possible cards (48) and 'draw' in the output.
@@ -23,15 +26,32 @@ if TEST_QNETWORK:
     print("---------------------")
     print("TEST Q_NETWORK")
     print("---------------------")
-    policy = Policy(50, 49)
-    inpt = np.random.choice([0,1,2], size = 50, p = [0.7, 0.2, 0.1])
-    output = policy(inpt)
-    action = policy.sampleAction(inpt)
-    print("input: {}".format(inpt))
+    unoengine = UnoEngine()
+    reinforcementAgent = ReinforcementAgent(unoengine.get_action_dim())
+    randomAgent = RandomAgent(unoengine.get_action_dim())
+    arena = Arena(reinforcementAgent, randomAgent, unoengine)
+    game_info = arena.get_game_info()
+    action_dim = unoengine.get_action_dim() # all cards + 'draw'
+    state_dim = action_dim + 1 # all cards, open card, opponents hand cards
+
+    policy = Policy(state_dim, action_dim)
+    output = policy(game_info)
+    action = policy.sampleAction(game_info)
+    print("input: {}".format(game_info))
     print("output: {}".format(output))
     print("sample action: {}".format(action))
 
-    print(policy.greedyAction(inpt))
+    # test if no legal card works
+    legalActions = game_info['legal_actions']
+    onlyIllegalActions = np.zeros(action_dim, dtype = bool)
+    onlyIllegalActions[-1] = True
+    print(onlyIllegalActions)
+    print(legalActions)
+    print('Has to draw (True): ', hasToDraw(onlyIllegalActions))
+    onlyIllegalActions[0] = True
+    print('Has to draw (False): ', hasToDraw(onlyIllegalActions))
+
+
 
 if TEST_ARENA:
     print("---------------------")
@@ -56,13 +76,27 @@ if TEST_AGENT:
     sampleAction = reinforcementAgent.sampleAction(game_info)
     greedyAction = reinforcementAgent.greedyAction(game_info)
     randomAction = reinforcementAgent.randomAction(game_info)
-    print("reinforcementAgent suggests action (digest): {}".format(digestAction))
-    print("reinforcementAgent stochastic action: {}".format(sampleAction))
-    print("stochastic action is legal:", isLegalAction(sampleAction, game_info['legal_actions']))
-    print("reinforcementAgent greedy action: {}".format(greedyAction))
-    print("reinforcementAgent random action: {}".format(randomAction))
+    print("ReinforcementAgent suggests action (digest): {}".format(digestAction))
+    print("is legal: ", isLegalAction(digestAction, game_info['legal_actions']))
+    print("ReinforcementAgent stochastic action: {}".format(sampleAction))
+    print("is legal: ", isLegalAction(sampleAction, game_info['legal_actions']))
+    print("ReinforcementAgent greedy action: {}".format(greedyAction))
+    print("is legal:", isLegalAction(greedyAction, game_info['legal_actions']))
+    print("ReinforcementAgent random action: {}".format(randomAction))
+    print("is legal:", isLegalAction(randomAction, game_info['legal_actions']))
+
+if TEST_GREEDY:
+    unoengine = UnoEngine()
+    reinforcementAgent = ReinforcementAgent(unoengine.get_action_dim())
+    randomAgent = RandomAgent(unoengine.get_action_dim())
+    arena = Arena(reinforcementAgent, randomAgent, unoengine)
+    game_info = arena.get_game_info()
+    greedyAction = reinforcementAgent.greedyAction(game_info)
+    print("Greedy action: ", greedyAction)
+    print("Greedy action is legal:", isLegalAction(greedyAction, game_info['legal_actions']))
 
 
+    
 
 
 
