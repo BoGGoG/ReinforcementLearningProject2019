@@ -29,11 +29,9 @@ class RandomAgent(Agent):
 class ReinforcementAgent(Agent):
     def __init__(self, action_dim):
         """
-        UNTIL NOW ONLY RANDOM MOVES
-        Agent that learns by Reinforcement Learning.
-        Method: Qlearning with Neural Network
-        inputLength is action_dim + 2 (last played card, number of opponent's hand cards)
-        :param action_dim: Size of action space
+        Decides on action based on Neural Network.
+        Method: Qlearning with Neural Network.
+        :param action_dim: Size of action space: number of cards + 1 (draw)
         """
         self.action_dim = action_dim
         self.policy = Policy(inputLength = action_dim + 1, outputLength = action_dim)
@@ -44,13 +42,13 @@ class ReinforcementAgent(Agent):
             until now: return sample from output of neural network (categorical distribution)
             ToDo: Implement epsilon greedy
         """
-        legal_actions = game_info['legal_actions']
         if game_info['game_over']:
+            "should now read reward and evaluate"
             print("GG easy")
             return None
 
-        if legal_actions.sum() <= 1:  # can only draw
-            return self.action_dim-1
+        # if game_info['legal_actions'].sum() <= 1:  # can only draw
+            # return self.action_dim-1
 
         return(self.sampleAction(game_info))
 

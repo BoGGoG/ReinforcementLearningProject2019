@@ -176,8 +176,8 @@ if __name__ == '__main__':
 
     # setup the arena
     unoengine = UnoEngine()
-    agent_0 = RandomAgent(unoengine.get_action_dim())
-    # agent_0 = ReinforcementAgent(unoengine.get_action_dim())
+    # agent_0 = RandomAgent(unoengine.get_action_dim())
+    agent_0 = ReinforcementAgent(unoengine.get_action_dim())
     agent_1 = RandomAgent(unoengine.get_action_dim())
 
     arena = Arena(agent_0, agent_1, unoengine)

@@ -60,8 +60,11 @@ if TEST_ARENA:
     unoengine = UnoEngine()
     agent_0 = ReinforcementAgent(unoengine.get_action_dim())
     agent_1 = RandomAgent(unoengine.get_action_dim())
-    print(agent_0)
-    print(agent_1)
+    arena = Arena(reinforcementAgent, randomAgent, unoengine)
+    game_info = arena.get_game_info()
+    for _ in range(5):
+        lastAction = arena.step()
+        print('Last action: ', lastAction)
 
 if TEST_AGENT:
     print("---------------------")
@@ -85,15 +88,6 @@ if TEST_AGENT:
     print("ReinforcementAgent random action: {}".format(randomAction))
     print("is legal:", isLegalAction(randomAction, game_info['legal_actions']))
 
-if TEST_GREEDY:
-    unoengine = UnoEngine()
-    reinforcementAgent = ReinforcementAgent(unoengine.get_action_dim())
-    randomAgent = RandomAgent(unoengine.get_action_dim())
-    arena = Arena(reinforcementAgent, randomAgent, unoengine)
-    game_info = arena.get_game_info()
-    greedyAction = reinforcementAgent.greedyAction(game_info)
-    print("Greedy action: ", greedyAction)
-    print("Greedy action is legal:", isLegalAction(greedyAction, game_info['legal_actions']))
 
 
     
