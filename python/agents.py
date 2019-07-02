@@ -52,15 +52,23 @@ class ReinforcementAgent(Agent):
         if legal_actions.sum() <= 1:  # can only draw
             return self.action_dim-1
 
-        pState = game_info['p_state']
-        return(self.stochasticAction(pState))
+        return(self.sampleAction(game_info))
 
-    def stochasticAction(self, pState):
+    def sampleAction(self, game_info):
         "random sample from categorical distribution (output of neural network)"
-        action = self.policy.sampleAction(pState)
+        action = self.policy.sampleAction(game_info)
         return action
 
-    def greedyAction(self, pState):
-        action = self.policy.greedyAction(pState)
+    def greedyAction(self, game_info):
+        action = self.policy.greedyAction(game_info)
         return action
+
+    def randomAction(self, game_info):
+        legal_actions = game_info['legal_actions']
+        if legal_actions.sum() <= 1:  # can only draw
+            return self.action_dim-1
+        else:
+            p = game_info['legal_actions'][:-1]
+            p = p / p.sum()
+            return np.random.choice(self.action_dim-1, p=p)
 

@@ -3,12 +3,12 @@ import numpy as np
 import sys
 sys.path.append("..")
 sys.path.append(".")
-from qnetwork import Policy
+from qnetwork import Policy, isLegalAction
 from arena import Arena, Agent
 from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 
-TEST_QNETWORK = True
+TEST_QNETWORK = False
 TEST_AGENT = True
 TEST_ARENA = True
 
@@ -53,11 +53,17 @@ if TEST_AGENT:
     arena = Arena(reinforcementAgent, randomAgent, unoengine)
     game_info = arena.get_game_info()
     digestAction = reinforcementAgent.digest(game_info)
-    stochasticAction = reinforcementAgent.stochasticAction(game_info['p_state'])
-    greedyAction = reinforcementAgent.greedyAction(game_info['p_state'])
+    sampleAction = reinforcementAgent.sampleAction(game_info)
+    greedyAction = reinforcementAgent.greedyAction(game_info)
+    randomAction = reinforcementAgent.randomAction(game_info)
     print("reinforcementAgent suggests action (digest): {}".format(digestAction))
-    print("reinforcementAgent stochastic action: {}".format(stochasticAction))
+    print("reinforcementAgent stochastic action: {}".format(sampleAction))
+    print("stochastic action is legal:", isLegalAction(sampleAction, game_info['legal_actions']))
     print("reinforcementAgent greedy action: {}".format(greedyAction))
+    print("reinforcementAgent random action: {}".format(randomAction))
+
+
+
 
 
 
