@@ -184,7 +184,7 @@ if __name__ == '__main__':
 
     # main loop
     # three rounds
-    for _ in range(3):
+    for _ in range(1):
         i = 0
         finished = False
         while not finished:

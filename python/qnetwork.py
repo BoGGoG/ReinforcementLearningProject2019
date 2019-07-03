@@ -47,7 +47,6 @@ class Policy(nn.Module):
         """
 
         if hasToDraw(game_info['legal_actions']):
-            print("Policy NN: agent can only draw, not even evaluating. Returning 'draw' action ")
             return self.outputLength - 1
         probs = self.forward(game_info)
         m = Categorical(probs)
@@ -66,7 +65,6 @@ class Policy(nn.Module):
         """
 
         if hasToDraw(game_info['legal_actions']):
-            print("Policy NN: agent can only draw, not even evaluating. Returning 'draw' action ")
             return self.outputLength - 1
         probs = self.forward(game_info)
         m = Categorical(probs)
