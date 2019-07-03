@@ -27,7 +27,7 @@ class Policy(nn.Module):
         self.outputLength = outputLength
         self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
         self.dropout = nn.Dropout(p = dropoutRate)
-        self.affine2 = nn.Linear(128, self.outputLength)
+        self.affine2 = nn.Linear(hiddenLayerSize, self.outputLength)
 
         self.saved_log_probs = []
         self.rewards = []

@@ -50,7 +50,7 @@ class ReinforcementAgent(Agent):
         # if game_info['legal_actions'].sum() <= 1:  # can only draw
             # return self.action_dim-1
 
-        return(self.sampleAction(game_info))
+        return(self.greedyAction(game_info))
 
     def sampleAction(self, game_info):
         "random sample from categorical distribution (output of neural network)"

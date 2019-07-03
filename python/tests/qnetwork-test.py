@@ -13,6 +13,7 @@ TEST_AGENT = True
 TEST_ARENA = True
 TEST_GREEDY = True
 
+
 """
 Those tests are not full unit tests, but just some production tests that should work
 after every change.
