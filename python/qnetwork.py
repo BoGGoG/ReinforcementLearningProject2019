@@ -12,7 +12,7 @@ dropoutRate = 0.6
 hiddenLayerSize = 128
 
 class Policy(nn.Module):
-    def __init__(self, inputLength, outputLength):
+    def __init__(self, inputLength, outputLength, discount = 0.95, explorationRate = 1.0, iterations = 10000):
         """NO LEARNING IMPLEMENTED
         ToDO:
         - check if legal move
@@ -25,6 +25,7 @@ class Policy(nn.Module):
         super(Policy, self).__init__()
         self.inputLength = inputLength
         self.outputLength = outputLength
+        self.discount = discount; self.explorationRate = explorationRate; self.iterations = iterations
         self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
         self.dropout = nn.Dropout(p = dropoutRate)
         self.affine2 = nn.Linear(hiddenLayerSize, self.outputLength)
@@ -39,7 +40,7 @@ class Policy(nn.Module):
         pState = self.dropout(pState)
         pState = F.relu(pState)
         action_scores = self.affine2(pState)
-        return F.softmax(action_scores, dim=0)
+        return F.softmax(action_scores, dim=-1)
 
     def sampleAction(self, game_info):
         """Returns sample action from categorical distribution of NN output

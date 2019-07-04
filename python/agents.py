@@ -43,7 +43,7 @@ class ReinforcementAgent(Agent):
             ToDo: Implement epsilon greedy
         """
         if game_info['game_over']:
-            "should now read reward and evaluate"
+            "should now read reward and evaluate, backpropagate"
             return None
 
         # if game_info['legal_actions'].sum() <= 1:  # can only draw
