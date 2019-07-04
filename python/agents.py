@@ -1,6 +1,7 @@
 import numpy as np
 from arena import Agent
 from qnetwork import Policy
+import torch
 
 DEBUG = False
 
@@ -50,10 +51,11 @@ class ReinforcementAgent(Agent):
             "should now read reward and evaluate, backpropagate"
             self.gamesPlayed += 1
             self.epsilon = 1. / (self.gamesPlayed / 50. + 10.)
-            return None
+            action = None
+        else:
+            action = self.epsilonGreedyAction(gameInfo)
 
         reward = gameInfo['reward']
-        action = self.epsilonGreedyAction(gameInfo)
         if self.prevGameInfo != 0 and self.prevAction != 0:
             self.policy.learn(self.prevGameInfo, self.prevAction, reward, gameInfo)
 

@@ -101,12 +101,14 @@ class Policy(nn.Module):
         reward = newGameInfo['reward']
 
         with torch.no_grad():
-            targetQs = reward + self.gamma * newStateQs
+            if newGameInfo['game_over']:
+                targetQs = torch.Tensor([reward])
+            else:
+                targetQs = reward + self.gamma * newStateQs
         loss = self.criterion(oldStateQs, targetQs)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
 
 
 def isLegalAction(action, legalActions):
