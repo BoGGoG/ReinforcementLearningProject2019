@@ -6,8 +6,8 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-# numberOfGames = 1000
-numberOfGames = 1000
+# numberOfGames = 400
+numberOfGames = 10000
 
 unoengine = UnoEngine()
 agent_0 = ReinforcementAgent(unoengine.get_action_dim())
@@ -32,10 +32,6 @@ for i in tqdm(range(1, numberOfGames)):
         player = game_info['turn']
         reward = game_info['reward']
         if game_over:
-            # print("game over")
-            # print("ended after {} steps".format(stepNumber))
-            # output = 'Player {} finishes with a reward of {}'.format(player, reward)
-            # print(output)
             if reward == 100:
                 gamesWonTemp[player] += 1
 
@@ -43,6 +39,9 @@ for i in tqdm(range(1, numberOfGames)):
 
     gamesWon = np.vstack((gamesWon, gamesWonTemp))
     stepsPerGame += stepNumber
+    if i % 1000 == 0:
+        print("games won RFA vs RA: ", gamesWonTemp)
+        print("epsilon: ", agent_0.epsilon)
                 
 
 stepsPerGame = stepsPerGame / numberOfGames
@@ -53,5 +52,5 @@ plt.plot(gamesWon)
 plt.title("Games Won")
 plt.xlabel("games played")
 plt.ylabel("win rate")
-plt.legend(["player 0", "player 1"])
+plt.legend(["Reinforcement Agent", "Random Agent"])
 plt.show()

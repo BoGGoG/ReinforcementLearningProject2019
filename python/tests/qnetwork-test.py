@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import numpy as np
 import sys
 sys.path.append("..")
@@ -9,9 +10,16 @@ from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 
 TEST_QNETWORK = True
+
 TEST_AGENT = True
 TEST_ARENA = True
 TEST_GREEDY = True
+TEST_TRAINING = True
+
+# TEST_AGENT = False
+# TEST_ARENA = False
+# TEST_GREEDY = False
+# TEST_TRAINING = True
 
 
 """
@@ -59,8 +67,8 @@ if TEST_ARENA:
     print("TEST ARENA")
     print("---------------------")
     unoengine = UnoEngine()
-    agent_0 = ReinforcementAgent(unoengine.get_action_dim())
-    agent_1 = RandomAgent(unoengine.get_action_dim())
+    reinforcementAgent = ReinforcementAgent(unoengine.get_action_dim())
+    randomAgent = RandomAgent(unoengine.get_action_dim())
     arena = Arena(reinforcementAgent, randomAgent, unoengine)
     game_info = arena.get_game_info()
     for _ in range(5):
@@ -91,7 +99,25 @@ if TEST_AGENT:
 
 
 
-    
+if TEST_TRAINING:    
+    unoengine = UnoEngine()
+    reinforcementAgent = ReinforcementAgent(unoengine.get_action_dim())
+    randomAgent = RandomAgent(unoengine.get_action_dim())
+    arena = Arena(reinforcementAgent, randomAgent, unoengine)
+    gameInfo = arena.get_game_info()
+    action_dim = unoengine.get_action_dim() # all cards + 'draw'
+    state_dim = action_dim + 1 # all cards, open card, opponents hand cards
+    def init_weights(m):
+        if type(m) == nn.Linear:
+            torch.nn.init.xavier_uniform_(m.weight)
+            m.bias.data.fill_(0.01)
+    policy = Policy(state_dim, action_dim)
+    # policy.apply(init_weights)
+    oldGameInfo = gameInfo
+    action = arena.step()
+    gameInfo = arena.get_game_info()
+    reward = gameInfo['reward']
+    policy.learn(oldGameInfo, action, reward, gameInfo)
 
 
 

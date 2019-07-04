@@ -8,7 +8,7 @@ print(tf.__version__)
 
 steps = 100
 
-useLongTrainedModel = False
+useLongTrainedModel = True
 currentModelPath = "model.ckpt"
 longTrainedModelPath = 'trainedModel/model.ckpt'
 if useLongTrainedModel:

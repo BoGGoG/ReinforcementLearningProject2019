@@ -5,20 +5,22 @@ import torch.optim as optim
 import torch.nn.functional as F
 from tqdm import tqdm
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 # PARAMETERS
 e = 0.1
 lr = .03
-y = .999
+gamma = .999
 # numEpisodes = 2000
 # numStepsPerEp = 99
-numEpisodes = 2
-numStepsPerEp = 1
+numEpisodes = 100            if reward == 1:
 
-env = gym.make('FrozenLake-v0')
+numStepsPerEp = 100
+
+env = gym.make('FrozenLake-v0', is_slippery = False)
 env.reset()
-env.render()
+# env.render()
 actionSpace = env.action_space.n
 stateSpace = env.observation_space.n
 
@@ -60,7 +62,7 @@ jList = []
 rList = []
 
 optimizer = optim.Adam(params = agent.parameters())
-citerion = nn.SmoothL1Loss()
+criterion = nn.SmoothL1Loss()
 actions = [a for a in range(actionSpace)]
 
 for episode in tqdm(range(numEpisodes)):
@@ -72,7 +74,39 @@ for episode in tqdm(range(numEpisodes)):
 
         if np.random.rand(1) < e:
             action[0][0] = np.random.randint(0,actionSpace - 1)
-        env.step(actions[action])
-        print(actions[action])
+        newState, reward, done, info = env.step(actions[action])
+        q = agent(state).max(1)[0].view(1, 1)
+        q1 = agent(newState).max(1)[0].view(1, 1)
 
-        
+        with torch.no_grad():
+            targetQ = reward + gamma * q1
+        loss = criterion(q, targetQ)
+        if step == 1 and step % 100 == 0:
+            print("loss and reward: ", i, loss, r)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        rAll += reward
+        state = newState
+
+        if done:
+            e = 1. / ((episode / 50.) + 10.)
+            if reward == 1:
+                print('geschafft')
+
+    rList.append(rAll)
+    jList.append(step)
+
+
+print(jList)
+print(rList)
+print("\Average steps per episode: " + str(sum(jList) / numEpisodes))
+print("\nScore over time: " + str(sum(rList) / numEpisodes))
+print("\nFinal Q-Network Policy:\n")
+# print_policy()
+plt.plot(jList)
+plt.plot(rList)
+# plt.savefig("j_q_network.png")
+plt.show()       

@@ -113,7 +113,8 @@ class UnoEngine(GameEnv):
             new_card = np.random.randint(self.n_different_cards)
             self.game_state['p_cards'][player][new_card] += 1
             self.game_state['turn'] = opponent
-            reward = 0
+            reward = -1 # 0 NOT SURE WHAT IS BETTER
+            # print('player {} draws a card'.format(player))
 
         # all other cases are the player playing a card
         else:

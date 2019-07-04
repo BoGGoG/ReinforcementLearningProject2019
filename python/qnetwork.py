@@ -12,28 +12,32 @@ dropoutRate = 0.6
 hiddenLayerSize = 128
 
 class Policy(nn.Module):
-    def __init__(self, inputLength, outputLength, discount = 0.95, explorationRate = 1.0, iterations = 10000):
-        """NO LEARNING IMPLEMENTED
-        ToDO:
-        - check if legal move
-        - only output legal move
-        - reinforcement learning
-        Qnetwork for uno. Takes pState [0,1,0,0,2,...] as input and outputs probabilities (?).
+    def __init__(self, inputLength, outputLength):
+        """Qnetwork for uno. Takes pState [0,1,0,0,2,...] as input and outputs probabilities.
         :param inputLength: state dimension: all cards + 'draw'
         :param outpuLength: action dimension: all cards, open card, opponents hand cards =usually  inputLength + 1
+        ToDo:
+        - save network
+        - load network
         """
         super(Policy, self).__init__()
         self.inputLength = inputLength
         self.outputLength = outputLength
-        self.discount = discount; self.explorationRate = explorationRate; self.iterations = iterations
         self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
         self.dropout = nn.Dropout(p = dropoutRate)
         self.affine2 = nn.Linear(hiddenLayerSize, self.outputLength)
+        self.optimizer = optim.Adam(self.parameters(), lr=1e-2)
+        self.criterion =  nn.SmoothL1Loss()
+        self.gamma = 0.99
 
         self.saved_log_probs = []
         self.rewards = []
 
     def forward(self, game_info):
+        """Feed game_info into network, get values for actions
+        param: game_info: from unoengine
+        ToDo: rename game_info -> gameinfo
+        """
         pState = game_info['p_state']
         pState = torch.Tensor(pState)
         pState = self.affine1(pState)
@@ -44,7 +48,8 @@ class Policy(nn.Module):
 
     def sampleAction(self, game_info):
         """Returns sample action from categorical distribution of NN output
-        Before evaluation checks if there is a legal action except drawing
+        Before evaluation checks if there is a legal action except drawing.
+        param: game_info: from unoengine
         """
 
         if hasToDraw(game_info['legal_actions']):
@@ -79,7 +84,30 @@ class Policy(nn.Module):
             legalAction = isLegalAction(action, game_info['legal_actions'])
             i += 1
 
+        self.saved_log_probs.append(m.log_prob(torch.scalar_tensor(action)))
         return action
+    
+    def learn(self, oldGameInfo, action, reward, newGameInfo):
+        """Minimize loss by backpropagation
+        targetQs = reward + gamma * newStateQs
+        loss = smoothL1Loss(oldStateQs, targetQs)
+        param: oldGameInfo: from before action
+        param: action
+        param: reward: after action
+        param: newGameInfo: after action
+        """
+        oldStateQs = self.forward(oldGameInfo)
+        newStateQs = self.forward(newGameInfo)
+        reward = newGameInfo['reward']
+
+        with torch.no_grad():
+            targetQs = reward + self.gamma * newStateQs
+        loss = self.criterion(oldStateQs, targetQs)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+
 
 def isLegalAction(action, legalActions):
     """Check if the action is legal.
