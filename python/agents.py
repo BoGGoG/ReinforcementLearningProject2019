@@ -61,8 +61,6 @@ class ReinforcementAgent(Agent):
         if self.prevGameInfo != 0 and self.prevAction != 0:
             self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]),
                 self.prevAction, reward, torch.Tensor(gameInfo["p_state"]), finalState)
-            if finalState:
-                print("Final State")
 
 
         self.prevAction = action

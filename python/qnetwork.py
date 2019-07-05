@@ -95,8 +95,6 @@ class Policy(nn.Module):
         param: reward: after action
         param: newpState: torch.Tensor, after action
         """
-        if finalState:
-            print('learning on final state!')
         oldStateQ = self.forward(oldpState)[action]
         newStateQ = self.forward(newpState).max()
 

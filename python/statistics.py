@@ -6,7 +6,7 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-numberOfGames = 1000
+numberOfGames = 2000
 # numberOfGames = 10000
 
 unoengine = UnoEngine()
