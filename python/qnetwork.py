@@ -9,7 +9,7 @@ from torch.distributions import Categorical
 import numpy as np
 
 dropoutRate = 0.6
-hiddenLayerSize = 128
+hiddenLayerSize = 512
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
@@ -26,7 +26,7 @@ class Policy(nn.Module):
         self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
         # self.dropout = nn.Dropout(p = dropoutRate)
         self.affine2 = nn.Linear(hiddenLayerSize, self.outputLength)
-        self.optimizer = optim.Adam(self.parameters(), lr=1e-2)
+        self.optimizer = optim.Adam(self.parameters(), lr=5e-3)
         self.criterion =  nn.SmoothL1Loss()
         self.gamma = 0.99
 
@@ -102,7 +102,7 @@ class Policy(nn.Module):
             if finalState:
                 targetQ = torch.Tensor([reward])
             else:
-                targetQ = reward + self.gamma * newStateQ
+                targetQ = torch.scalar_tensor(reward) + self.gamma * newStateQ
         targetQ = reward + self.gamma * newStateQ
         loss = self.criterion(oldStateQ, targetQ)
         self.optimizer.zero_grad()

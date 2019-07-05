@@ -28,7 +28,7 @@ class RandomAgent(Agent):
             return np.random.choice(self.action_dim-1, p=p)
 
 class ReinforcementAgent(Agent):
-    def __init__(self, action_dim, epsilon = 0.1, prevGameInfo = 0, prevAction = 0, gamesPlayed = 0):
+    def __init__(self, action_dim, epsilon = 0.1, prevGameInfo = 0, prevAction = -1, gamesPlayed = 0):
         """
         Decides on action based on Neural Network.
         Method: Qlearning with Neural Network.
@@ -47,18 +47,23 @@ class ReinforcementAgent(Agent):
             param: gameInfo: dict from unoengine
         """
         self.policy.rewards.append(gameInfo['reward'])
+        reward = gameInfo['reward']
         if gameInfo['game_over']:
             "game ended, make epsilon smaller"
             self.gamesPlayed += 1
             self.epsilon = 1. / (self.gamesPlayed / 50. + 10.)
             action = None
             finalState = True
+            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]),
+                self.prevAction, reward, torch.Tensor(gameInfo["p_state"]), finalState)
+            self.prevAction = -1
+            self.prevGameInfo = 0
+            return(0)
         else:
             action = self.epsilonGreedyAction(gameInfo)
             finalState = False
 
-        reward = gameInfo['reward']
-        if self.prevGameInfo != 0 and self.prevAction != 0:
+        if self.prevGameInfo != 0 and self.prevAction != -1:
             self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]),
                 self.prevAction, reward, torch.Tensor(gameInfo["p_state"]), finalState)
 
