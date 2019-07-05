@@ -48,16 +48,22 @@ class ReinforcementAgent(Agent):
         """
         self.policy.rewards.append(gameInfo['reward'])
         if gameInfo['game_over']:
-            "should now read reward and evaluate, backpropagate"
+            "game ended, make epsilon smaller"
             self.gamesPlayed += 1
             self.epsilon = 1. / (self.gamesPlayed / 50. + 10.)
             action = None
+            finalState = True
         else:
             action = self.epsilonGreedyAction(gameInfo)
+            finalState = False
 
         reward = gameInfo['reward']
         if self.prevGameInfo != 0 and self.prevAction != 0:
-            self.policy.learn(self.prevGameInfo, self.prevAction, reward, gameInfo)
+            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]),
+                self.prevAction, reward, torch.Tensor(gameInfo["p_state"]), finalState)
+            if finalState:
+                print("Final State")
+
 
         self.prevAction = action
         self.prevGameInfo = gameInfo
@@ -71,7 +77,7 @@ class ReinforcementAgent(Agent):
 
     def greedyAction(self, game_info):
         "legal action with highest log prob"
-        action = self.policy.greedyAction(game_info)
+        action = self.policy.greedyAction(game_info['p_state'], game_info['legal_actions'])
         return action
 
     def epsilonGreedyAction(self, game_info):

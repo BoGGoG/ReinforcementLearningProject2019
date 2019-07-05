@@ -9,11 +9,10 @@ from arena import Arena, Agent
 from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 
-TEST_QNETWORK = True
-
-TEST_AGENT = True
-TEST_ARENA = True
-TEST_GREEDY = True
+TEST_QNETWORK = False
+TEST_AGENT = False
+TEST_ARENA = False
+TEST_GREEDY = False
 TEST_TRAINING = True
 
 # TEST_AGENT = False
@@ -100,6 +99,9 @@ if TEST_AGENT:
 
 
 if TEST_TRAINING:    
+    print("---------------------")
+    print("TEST TRAINING")
+    print("---------------------")
     unoengine = UnoEngine()
     reinforcementAgent = ReinforcementAgent(unoengine.get_action_dim())
     randomAgent = RandomAgent(unoengine.get_action_dim())
@@ -117,7 +119,8 @@ if TEST_TRAINING:
     action = arena.step()
     gameInfo = arena.get_game_info()
     reward = gameInfo['reward']
-    policy.learn(oldGameInfo, action, reward, gameInfo)
+    policy.learn(torch.Tensor(oldGameInfo["p_state"]), action,
+            reward, torch.Tensor(gameInfo['p_state']))
 
 
 

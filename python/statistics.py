@@ -6,8 +6,8 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-# numberOfGames = 400
-numberOfGames = 10000
+numberOfGames = 1000
+# numberOfGames = 10000
 
 unoengine = UnoEngine()
 agent_0 = ReinforcementAgent(unoengine.get_action_dim())
