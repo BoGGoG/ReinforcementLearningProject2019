@@ -8,8 +8,8 @@ import torch.optim as optim
 from torch.distributions import Categorical
 import numpy as np
 
-dropoutRate = 0.6
-hiddenLayerSize = 200
+# dropoutRate = 0.6
+hiddenLayerSize = 300
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
@@ -26,7 +26,7 @@ class Policy(nn.Module):
         self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
         # self.dropout = nn.Dropout(p = dropoutRate)
         self.affine2 = nn.Linear(hiddenLayerSize, self.outputLength)
-        self.optimizer = optim.Adam(self.parameters(), lr=5e-3)
+        self.optimizer = optim.Adam(self.parameters(), lr=5e-2)
         self.criterion =  nn.SmoothL1Loss()
         self.gamma = 0.99
 

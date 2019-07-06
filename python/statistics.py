@@ -6,6 +6,7 @@ import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+
 numberOfGames = 5000
 # numberOfGames = 10000
 
@@ -15,15 +16,24 @@ agent_0 = ReinforcementAgent(unoengine.get_action_dim())
 agent_1 = RandomAgent(unoengine.get_action_dim())
 arena = Arena(agent_0, agent_1, unoengine)
 
-gamesWon = np.array(([0,0], [0,0]))
+gamesHistory = np.array([0,0])
 stepsPerGame = 0
+
+def rollingMean(gamesHistory, windowSize = 100):
+    # get only 0th element (RFL)
+    gamesHistory = np.array(list(map(lambda row: row[0], gamesHistory)))
+    rollingMeanHistory = [0.]
+    for i in range(windowSize, gamesHistory.shape[0] + 1):
+        windowMean = gamesHistory[i - windowSize:i].mean()
+        rollingMeanHistory.append(windowMean)
+    return(rollingMeanHistory)
 
 for i in tqdm(range(1, numberOfGames)):
     finished = False
     stepNumber = 0
-    gamesWonTemp = copy.copy(gamesWon[-1])
 
     while not(finished):
+        currentGame = np.array([0,0])
         action = arena.step()
         stepNumber += 1
         finished = (arena.agent_0_done and arena.agent_1_done)
@@ -33,24 +43,20 @@ for i in tqdm(range(1, numberOfGames)):
         reward = game_info['reward']
         if game_over:
             if reward == 100:
-                gamesWonTemp[player] += 1
+                currentGame[player] += 1
 
-    prev = gamesWon[-1]
 
-    gamesWon = np.vstack((gamesWon, gamesWonTemp))
+    gamesHistory = np.vstack((gamesHistory, currentGame))
     stepsPerGame += stepNumber
-    if i % 1000 == 0:
-        print("games won RFA vs RA: ", gamesWonTemp)
+    if i % 1001 == 0:
+        print("{} episodes finished", i)
         print("epsilon: ", agent_0.epsilon)
                 
 
 stepsPerGame = stepsPerGame / numberOfGames
-gamesWon = list(map(lambda row: row / sum(row), gamesWon))
-print("games won: ", gamesWon[-1])
-print("average steps per game ", stepsPerGame)
-plt.plot(gamesWon)
-plt.title("Games Won")
+rollingMeanHistory = rollingMean(gamesHistory, 200)
+plt.plot(rollingMeanHistory)
+plt.title("Games Won rolling mean (200)")
 plt.xlabel("games played")
 plt.ylabel("win rate")
-plt.legend(["Reinforcement Agent", "Random Agent"])
 plt.show()

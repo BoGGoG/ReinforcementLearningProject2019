@@ -33,6 +33,7 @@ class ReinforcementAgent(Agent):
         Decides on action based on Neural Network.
         Method: Qlearning with Neural Network.
         :param action_dim: Size of action space: number of cards + 1 (draw)
+        :epsilon: epsilon greedy, but not really implemented, this param will only change very first iteration
         """
         self.action_dim = action_dim
         self.policy = Policy(inputLength = action_dim + 1, outputLength = action_dim)
