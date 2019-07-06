@@ -9,11 +9,12 @@ from arena import Arena, Agent
 from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 
-TEST_QNETWORK = True
-TEST_AGENT = True
-TEST_ARENA = True
-TEST_GREEDY = True
-TEST_TRAINING = True
+TEST_QNETWORK = False
+TEST_AGENT = False
+TEST_ARENA = False
+TEST_GREEDY = False
+TEST_TRAINING = False
+TEST_SAVING = True
 
 
 """
@@ -119,6 +120,30 @@ if TEST_TRAINING:
     policy.learn(torch.Tensor(oldGameInfo["p_state"]), action,
             reward, torch.Tensor(gameInfo['p_state']))
 
-
+if TEST_SAVING:
+    print("---------------------")
+    print("TEST SAVING")
+    print("---------------------")
+    unoengine = UnoEngine()
+    reinforcementAgent = ReinforcementAgent(unoengine.get_action_dim())
+    randomAgent = RandomAgent(unoengine.get_action_dim())
+    arena = Arena(reinforcementAgent, randomAgent, unoengine)
+    for _ in range(100):
+        arena.step()
+    print('first agent (some) parameters')
+    modelParams = reinforcementAgent.policy.state_dict()
+    print(modelParams['affine1.weight'][0])
+    error = reinforcementAgent.saveModel('save/model.pwf')
+    if not(error):
+        print('model saved')
+    reinforcementAgent2 = ReinforcementAgent(unoengine.get_action_dim())
+    print('new agent (some) parameters')
+    print(reinforcementAgent2.policy.state_dict()['affine1.weight'][0])
+    print('games played before loading', reinforcementAgent2.gamesPlayed)
+    reinforcementAgent2.loadModel('save/model.pwf')
+    print('loading model')
+    print('parameters after loading')
+    print(reinforcementAgent2.policy.state_dict()['affine1.weight'][0])
+    print('games played after loading', reinforcementAgent2.gamesPlayed)
 
 

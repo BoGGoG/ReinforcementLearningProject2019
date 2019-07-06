@@ -7,12 +7,19 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 5000
+numberOfGames = 400
 rollingMeanWindow = 200
-# numberOfGames = 10000
+modelSavePath = 'save/savedModel.pwf'
+loadModel = False
+
+# -------------------------------------
+# SETUP
+# -------------------------------------
 
 unoengine = UnoEngine()
 agent_0 = ReinforcementAgent(unoengine.get_action_dim())
+if loadModel:
+    agent_0.loadModel(modelSavePath)
 # agent_0 = RandomAgent(unoengine.get_action_dim())
 agent_1 = RandomAgent(unoengine.get_action_dim())
 arena = Arena(agent_0, agent_1, unoengine)
@@ -57,10 +64,11 @@ for i in tqdm(range(1, numberOfGames)):
         print("epsilon: ", agent_0.epsilon)
                 
 
+agent_0.saveModel(modelSavePath)
 stepsPerGame = stepsPerGame / numberOfGames
 rollingMeanHistory = rollingMean(gamesHistory, rollingMeanWindow)
 plt.plot(rollingMeanHistory)
-plt.title("Games Won rolling mean ({})".format(rollingMeanWindow))
+plt.title("Games Won rolling mean ({})\ngamesPlayed = {}".format(rollingMeanWindow, agent_0.gamesPlayed))
 plt.xlabel("games played")
 plt.ylabel("win rate")
 plt.show()

@@ -1,5 +1,6 @@
 import numpy as np
 from arena import Agent
+import torch
 from qnetwork import Policy
 import torch
 
@@ -53,7 +54,6 @@ class ReinforcementAgent(Agent):
         reward = gameInfo['reward']
         if gameInfo['game_over']:
             "game ended, make epsilon smaller"
-            self.gamesPlayed += 1
             self.epsilon = 1. / (self.gamesPlayed / 50. + 8.)
             action = None
             finalState = True
@@ -62,6 +62,7 @@ class ReinforcementAgent(Agent):
             self.prevAction = -1
             self.prevGameInfo = 0
             self.gamesPlayed += 1
+            # print('RFL agent finished')
             return(-1)
         else:
             action = self.epsilonGreedyAction(gameInfo)
@@ -105,4 +106,26 @@ class ReinforcementAgent(Agent):
             p = game_info['legal_actions'][:-1]
             p = p / p.sum()
             return np.random.choice(self.action_dim-1, p=p)
+
+    def saveModel(self, path):
+        modelParams = { 
+                'gamesPlayed':self.gamesPlayed,
+                'stateDict': self.policy.state_dict(),
+                'epsilon': self.epsilon,
+                'optimizerStateDict': self.policy.optimizer.state_dict()
+                }
+        torch.save(modelParams, path)
+        print('Model Saved to', path)
+        return(0) # 0 no error
+
+    def loadModel(self, path):
+        modelParams = torch.load(path)
+        self.gamesPlayed = modelParams['gamesPlayed']
+        self.epsilon = modelParams['epsilon']
+        self.policy.load_state_dict(modelParams['stateDict'])
+        self.policy.optimizer.load_state_dict(modelParams['optimizerStateDict'])
+        print('Model Loaded from', path)
+        print('previously played {} games'.format(self.gamesPlayed))
+        return(0) # 0 no error
+
 
