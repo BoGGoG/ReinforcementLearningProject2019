@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 
 numberOfGames = 5000
+rollingMeanWindow = 200
 # numberOfGames = 10000
 
 unoengine = UnoEngine()
@@ -28,6 +29,9 @@ def rollingMean(gamesHistory, windowSize = 100):
         rollingMeanHistory.append(windowMean)
     return(rollingMeanHistory)
 
+# ----------------------------------------------------------------
+# Play many games, train, collect data, plot
+# ----------------------------------------------------------------
 for i in tqdm(range(1, numberOfGames)):
     finished = False
     stepNumber = 0
@@ -54,9 +58,9 @@ for i in tqdm(range(1, numberOfGames)):
                 
 
 stepsPerGame = stepsPerGame / numberOfGames
-rollingMeanHistory = rollingMean(gamesHistory, 200)
+rollingMeanHistory = rollingMean(gamesHistory, rollingMeanWindow)
 plt.plot(rollingMeanHistory)
-plt.title("Games Won rolling mean (200)")
+plt.title("Games Won rolling mean ({})".format(rollingMeanWindow))
 plt.xlabel("games played")
 plt.ylabel("win rate")
 plt.show()
