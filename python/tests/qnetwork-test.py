@@ -9,16 +9,11 @@ from arena import Arena, Agent
 from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 
-TEST_QNETWORK = False
-TEST_AGENT = False
-TEST_ARENA = False
-TEST_GREEDY = False
+TEST_QNETWORK = True
+TEST_AGENT = True
+TEST_ARENA = True
+TEST_GREEDY = True
 TEST_TRAINING = True
-
-# TEST_AGENT = False
-# TEST_ARENA = False
-# TEST_GREEDY = False
-# TEST_TRAINING = True
 
 
 """
@@ -42,9 +37,11 @@ if TEST_QNETWORK:
     action_dim = unoengine.get_action_dim() # all cards + 'draw'
     state_dim = action_dim + 1 # all cards, open card, opponents hand cards
 
+    pState = torch.Tensor(game_info['p_state'])
+    legalActions = game_info['legal_actions']
     policy = Policy(state_dim, action_dim)
-    output = policy(game_info)
-    action = policy.sampleAction(game_info)
+    output = policy(pState)
+    action = policy.sampleAction(pState, legalActions)
     print("input: {}".format(game_info))
     print("output: {}".format(output))
     print("sample action: {}".format(action))

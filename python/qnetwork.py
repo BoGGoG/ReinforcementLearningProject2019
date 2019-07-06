@@ -9,7 +9,7 @@ from torch.distributions import Categorical
 import numpy as np
 
 dropoutRate = 0.6
-hiddenLayerSize = 512
+hiddenLayerSize = 200
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
@@ -45,21 +45,21 @@ class Policy(nn.Module):
         action_scores = self.affine2(pState)
         return F.softmax(action_scores, dim=-1)
 
-    def sampleAction(self, game_info):
+    def sampleAction(self, pState, legalActions):
         """Returns sample action from categorical distribution of NN output
         Before evaluation checks if there is a legal action except drawing.
         param: game_info: from unoengine
         """
 
-        if hasToDraw(game_info['legal_actions']):
+        if hasToDraw(legalActions):
             return self.outputLength - 1
-        probs = self.forward(game_info)
+        probs = self.forward(pState)
         m = Categorical(probs)
         legalAction = False
         while not(legalAction):
             "possible endless loop?"
             action = m.sample()
-            legalAction = isLegalAction(action, game_info['legal_actions'])
+            legalAction = isLegalAction(action, legalActions)
 
         # self.saved_log_probs.append(m.log_prob(action))
         return action.item()

@@ -75,7 +75,9 @@ class ReinforcementAgent(Agent):
     def sampleAction(self, game_info):
         """random legal sample from categorical distribution (output of neural network).
         Always legal action"""
-        action = self.policy.sampleAction(game_info)
+        pState = torch.Tensor(game_info['p_state'])
+        legalActions = torch.Tensor(game_info['legal_actions'])
+        action = self.policy.sampleAction(pState, legalActions)
         return action
 
     def greedyAction(self, game_info):
