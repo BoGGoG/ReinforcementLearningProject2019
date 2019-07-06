@@ -42,23 +42,26 @@ class ReinforcementAgent(Agent):
 
     def digest(self, gameInfo):
         """
-            take game info, throw into neural network, return action
+            ToDo: Write better, this is ugly code.
+            Take game info, throw into neural network, return action
             epsilon greedy. After every step learn. After every match decrease epsilon
             param: gameInfo: dict from unoengine
+            return: action between 0 and action_dim -1. -1 if finalState
         """
-        self.policy.rewards.append(gameInfo['reward'])
+        # self.policy.rewards.append(gameInfo['reward']) # why?
         reward = gameInfo['reward']
         if gameInfo['game_over']:
             "game ended, make epsilon smaller"
             self.gamesPlayed += 1
-            self.epsilon = 1. / (self.gamesPlayed / 50. + 10.)
+            self.epsilon = 1. / (self.gamesPlayed / 50. + 8.)
             action = None
             finalState = True
             self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]),
                 self.prevAction, reward, torch.Tensor(gameInfo["p_state"]), finalState)
             self.prevAction = -1
             self.prevGameInfo = 0
-            return(0)
+            self.gamesPlayed += 1
+            return(-1)
         else:
             action = self.epsilonGreedyAction(gameInfo)
             finalState = False
