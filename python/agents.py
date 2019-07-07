@@ -41,10 +41,6 @@ class ReinforcementAgent(Agent):
         """
         self.memory = deque(maxlen=memory_size)
 
-        self.Q_std = 10000
-        self.Q_mean = 0
-        self.Q_stats_decay = .01
-
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
         else:
@@ -58,6 +54,12 @@ class ReinforcementAgent(Agent):
         self.prevAction = None
         self.gamesPlayed = gamesPlayed
         self.discount = 0.99
+
+        self.Q_std = 10000
+        self.Q_mean = 0
+        self.Q_avgs = np.zeros(self.action_dim)
+        self.Q_stats_decay = .01
+
 
         self.action_list = np.identity(self.action_dim)
 
@@ -86,7 +88,7 @@ class ReinforcementAgent(Agent):
             # print('RFL agent finished with reward {}'.format(gameInfo['reward']))
             # return action
         else:
-            action = self.get_action(gameInfo, epsilon=self.epsilon, random_Q=self.Q_std)
+            action = self.get_action(gameInfo, epsilon=.0, random_Q=self.Q_std)
             final_state = False
 
         # if self.prevGameInfo != 0 and self.prevAction != None:
@@ -109,7 +111,7 @@ class ReinforcementAgent(Agent):
         """
         self.memory.append([st1, ac, rew, st2, don])
 
-    def fit_from_memory(self, epochs=3, batch_size=16):
+    def fit_from_memory(self, epochs=4, batch_size=16):
         """Fit the Q model on random data from the memory
         """
         sample_size = min(batch_size, len(self.memory))
@@ -145,15 +147,18 @@ class ReinforcementAgent(Agent):
                 Qs = self.policy(p_state).cpu().numpy()
 
             if len(self.memory) >= self.memory.maxlen:
-                self.Q_std = self.Q_stats_decay * Qs.std() \
-                             + (1 - self.Q_stats_decay) * self.Q_std
-            self.Q_mean = self.Q_stats_decay * Qs.mean() \
-                          + (1 - self.Q_stats_decay) * self.Q_mean
+                self.Q_std = self.accumulate_Q_stats(self.Q_std, Qs.std())
+            self.Q_mean = self.accumulate_Q_stats(self.Q_mean, Qs.mean())
+            self.Q_avgs = self.accumulate_Q_stats(self.Q_avgs, Qs)
+
             Qs += random_Q * np.random.rand(len(Qs))
             legal_inds = np.argwhere(game_info['legal_actions']).flatten()
             legal_Qs = Qs[legal_inds]
             action = legal_inds[legal_Qs.argmax()]
         return action
+
+    def accumulate_Q_stats(self, x_old, x_new):
+        return self.Q_stats_decay * x_new + (1-self.Q_stats_decay) * x_old
 
     def sampleAction(self, game_info):
         """random legal sample from categorical distribution (output of neural network).
@@ -207,5 +212,4 @@ class ReinforcementAgent(Agent):
         print('Model Loaded from', path)
         print('previously played {} games'.format(self.gamesPlayed))
         return(0) # 0 no error
-
 
