@@ -4,6 +4,7 @@ import torch
 from qnetwork import Policy
 import torch
 from collections import deque
+import random
 
 DEBUG = False
 
@@ -83,23 +84,43 @@ class ReinforcementAgent(Agent):
 
         if self.prevGameInfo != 0 and self.prevAction != None:
 
-            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
-                self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
+            #self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
+            #    self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
 
             self.remember(gameInfo['p_state'], action, reward, self.prevGameInfo['p_state'], finalState)
+
+        if finalState:
+            self.fit_from_memory()
 
         self.prevAction = action
         self.prevGameInfo = gameInfo
         return action
 
     def remember(self, st1, ac, rew, st2, don):
-        """Commit series to memory.
-        Selective memory: only memorize samples where prediction was worse than average.
-        This means the actual Q-values must be known.
+        """Commit round to memory.
         """
         self.memory.append([st1, ac, rew, st2, don])
 
-    def get_action(self, game_info, random_Q=10):
+    def fit_from_memory(self, epochs=3, batch_size=16):
+        """Fit the Q model on random data from the memory
+        """
+        sample_size = min(batch_size, len(self.memory))
+        for i in range(epochs):
+            sample = random.sample(self.memory, sample_size)
+            st1, ac, rew, st2, don = map(np.array, zip(*sample))
+            q_next = self.policy(torch.Tensor(st2).to(self.device))
+            don = torch.Tensor(don).to(self.device)
+            q_next = q_next.max(dim=1) * (1 - don)
+            rew = torch.Tensor(rew)
+            q_target = rew + self.discount * q_next
+            q_old = self.policy(torch.Tensor(st1).to(self.device))
+
+            loss = (q_target - q_old)**2
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+
+    def get_action(self, game_info, random_Q=3):
         p_state = torch.Tensor(game_info['p_state']).to(self.device)
         with torch.no_grad():
             Qs = self.policy(p_state).cpu().numpy()
