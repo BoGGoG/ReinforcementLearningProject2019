@@ -88,7 +88,7 @@ class ReinforcementAgent(Agent):
             # print('RFL agent finished with reward {}'.format(gameInfo['reward']))
             # return action
         else:
-            action = self.get_action(gameInfo, epsilon=.0, random_Q=self.Q_std)
+            action = self.get_action(gameInfo, epsilon=.0, random_Q=self.Q_std*2)
             final_state = False
 
         # if self.prevGameInfo != 0 and self.prevAction != None:
