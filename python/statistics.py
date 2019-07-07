@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 4000
+numberOfGames = 10000
 rollingMeanWindow = 200
 modelSavePath = 'save/savedModel.pwf'
 loadModel = False
@@ -24,7 +24,7 @@ if loadModel:
 agent_1 = RandomAgent(unoengine.get_action_dim())
 arena = Arena(agent_0, agent_1, unoengine)
 
-gamesHistory = np.array([0,0])
+gamesHistory = np.array([0, 0])
 stepsPerGame = 0
 
 def rollingMean(gamesHistory, windowSize = 100):
@@ -58,7 +58,7 @@ for i in tqdm(range(1, numberOfGames)):
 
     gamesHistory = np.vstack((gamesHistory, currentGame))
     stepsPerGame += stepNumber
-    if i % 1001 == 0:
+    if i+1 % 1000 == 0:
         print("{} episodes finished", i)
         print("epsilon: ", agent_0.epsilon)
                 

@@ -68,18 +68,18 @@ class ReinforcementAgent(Agent):
         reward = gameInfo['reward']
         if gameInfo['game_over']:
             "game ended, make epsilon smaller"
-            self.epsilon = 1. / (self.gamesPlayed / 50. + 8.)
+            self.epsilon = 1. / (self.gamesPlayed / 100. + 8.)
             action = None
             finalState = True
-            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
-                              self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
+            #self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
+            #                  self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
             self.prevAction = -1
             self.prevGameInfo = 0
             self.gamesPlayed += 1
             # print('RFL agent finished with reward {}'.format(gameInfo['reward']))
             return action
         else:
-            action = self.get_action(gameInfo)
+            action = self.get_action(gameInfo, epsilon=self.epsilon)
             finalState = False
 
         if self.prevGameInfo != 0 and self.prevAction != None:
@@ -120,15 +120,19 @@ class ReinforcementAgent(Agent):
             loss.backward()
             self.optimizer.step()
 
-    def get_action(self, game_info, random_Q=3):
-        p_state = torch.Tensor(game_info['p_state']).to(self.device)
-        with torch.no_grad():
-            Qs = self.policy(p_state).cpu().numpy()
-        Qs += random_Q * np.random.rand(len(Qs))
-        legal_inds = np.argwhere(game_info['legal_actions']).flatten()
-        legal_Qs = Qs[legal_inds]
-        best_ind = legal_inds[legal_Qs.argmax()]
-        return best_ind
+    def get_action(self, game_info, random_Q=3, epsilon=0.):
+        if epsilon>0 and np.random.rand() < epsilon:
+            legal_inds = np.argwhere(game_info['legal_actions']).flatten()
+            action = np.random.choice(legal_inds)
+        else:
+            p_state = torch.Tensor(game_info['p_state']).to(self.device)
+            with torch.no_grad():
+                Qs = self.policy(p_state).cpu().numpy()
+            Qs += random_Q * np.random.rand(len(Qs))
+            legal_inds = np.argwhere(game_info['legal_actions']).flatten()
+            legal_Qs = Qs[legal_inds]
+            action = legal_inds[legal_Qs.argmax()]
+        return action
 
     def sampleAction(self, game_info):
         """random legal sample from categorical distribution (output of neural network).
