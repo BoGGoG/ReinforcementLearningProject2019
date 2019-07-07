@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 10000
+numberOfGames = 4000
 rollingMeanWindow = 200
 modelSavePath = 'save/savedModel.pwf'
 loadModel = False
@@ -58,9 +58,9 @@ for i in tqdm(range(1, numberOfGames)):
 
     gamesHistory = np.vstack((gamesHistory, currentGame))
     stepsPerGame += stepNumber
-    if i+1 % 1000 == 0:
-        print("{} episodes finished", i)
-        print("epsilon: ", agent_0.epsilon)
+    if (i+1) % 1000 == 0:
+        print("{} episodes finished".format(i+1))
+        print("Q prediction std: {}; mean: {}".format(agent_0.Q_std, agent_0.Q_mean))
                 
 
 agent_0.saveModel(modelSavePath)

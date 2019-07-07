@@ -8,8 +8,8 @@ import torch.optim as optim
 from torch.distributions import Categorical
 import numpy as np
 
-# dropoutRate = 0.6
-hiddenLayerSize = 300
+dropoutRate = 0.6
+hiddenLayerSizes = [1024, 1024]
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
@@ -23,9 +23,12 @@ class Policy(nn.Module):
         super(Policy, self).__init__()
         self.inputLength = inputLength
         self.outputLength = outputLength
-        self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
-        # self.dropout = nn.Dropout(p = dropoutRate)
-        self.affine2 = nn.Linear(hiddenLayerSize, self.outputLength)
+
+        self.affine1 = nn.Linear(self.inputLength, hiddenLayerSizes[0])
+        self.affine2 = nn.Linear(hiddenLayerSizes[0], hiddenLayerSizes[1])
+        self.last_affine = nn.Linear(hiddenLayerSizes[1], self.outputLength)
+
+        self.dropout = nn.Dropout(p=dropoutRate)
         self.optimizer = optim.Adam(self.parameters(), lr=5e-3)
         self.criterion = nn.SmoothL1Loss()
         self.gamma = 0.99
@@ -39,8 +42,10 @@ class Policy(nn.Module):
         """
         pState = self.affine1(pState)
         pState = F.relu(pState)
-        action_scores = self.affine2(pState)
-        return action_scores
+        pState = self.affine2(pState)
+        pState = F.relu(pState)
+        Qs = self.last_affine(pState)
+        return Qs
 
     def sampleAction(self, pState, legalActions):
         """Returns sample action from categorical distribution of NN output
