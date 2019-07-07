@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 10000
+numberOfGames = 20000
 rollingMeanWindow = 200
 modelSavePath = 'save/savedModel.pwf'
 loadModel = False
@@ -61,6 +61,7 @@ for i in tqdm(range(1, numberOfGames)):
     if (i+1) % 1000 == 0:
         print("{} episodes finished".format(i+1))
         print("Q prediction std: {}; mean: {}".format(agent_0.Q_std, agent_0.Q_mean))
+        print("avg win rate: {}".format(agent_0.avg_win_rate))
         print("avg Qs: {}".format(agent_0.Q_avgs))
 
 

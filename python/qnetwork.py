@@ -29,7 +29,9 @@ class Policy(nn.Module):
         self.last_affine = nn.Linear(hiddenLayerSizes[0], self.outputLength)
 
         self.dropout = nn.Dropout(p=dropoutRate)
-        self.optimizer = optim.Adam(self.parameters(), lr=1e-3)
+        # self.optimizer = optim.Adam(self.parameters(), lr=1e-3)
+        self.optimizer = optim.SGD(self.parameters(), lr=0.001, momentum=0.9)
+        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=1000, gamma=0.9)
         self.criterion = nn.SmoothL1Loss()
         self.gamma = 0.99
 

@@ -60,6 +60,7 @@ class ReinforcementAgent(Agent):
         self.Q_avgs = np.zeros(self.action_dim)
         self.Q_stats_decay = .01
 
+        self.avg_win_rate = 0.
 
         self.action_list = np.identity(self.action_dim)
 
@@ -85,10 +86,14 @@ class ReinforcementAgent(Agent):
             #self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
             #                  self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
             self.gamesPlayed += 1
+            if reward > 0:
+                self.avg_win_rate = 0.02 + 0.98*self.avg_win_rate
+            else:
+                self.avg_win_rate = 0.98 * self.avg_win_rate
             # print('RFL agent finished with reward {}'.format(gameInfo['reward']))
             # return action
         else:
-            action = self.get_action(gameInfo, epsilon=.0, random_Q=self.Q_std*2)
+            action = self.get_action(gameInfo, epsilon=.0, random_Q=(1-self.avg_win_rate)*self.Q_std*3)
             final_state = False
 
         # if self.prevGameInfo != 0 and self.prevAction != None:
@@ -136,6 +141,7 @@ class ReinforcementAgent(Agent):
             self.policy.optimizer.zero_grad()
             loss.backward()
             self.policy.optimizer.step()
+            self.policy.scheduler.step()
 
     def get_action(self, game_info, random_Q=10, epsilon=0.):
         if epsilon > 0 and np.random.rand() < epsilon:
