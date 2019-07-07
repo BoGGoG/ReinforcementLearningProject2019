@@ -40,7 +40,7 @@ class Policy(nn.Module):
         pState = self.affine1(pState)
         pState = F.relu(pState)
         action_scores = self.affine2(pState)
-        return F.softmax(action_scores, dim=-1)
+        return action_scores
 
     def sampleAction(self, pState, legalActions):
         """Returns sample action from categorical distribution of NN output

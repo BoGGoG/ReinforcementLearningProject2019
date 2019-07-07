@@ -3,6 +3,7 @@ from arena import Agent
 import torch
 from qnetwork import Policy
 import torch
+from collections import deque
 
 DEBUG = False
 
@@ -29,13 +30,19 @@ class RandomAgent(Agent):
             return np.random.choice(self.action_dim-1, p=p)
 
 class ReinforcementAgent(Agent):
-    def __init__(self, action_dim, epsilon = 0.1, prevGameInfo = 0, prevAction = -1, gamesPlayed = 0):
+    def __init__(self, action_dim, epsilon = 0.1, prevGameInfo = 0, prevAction = -1, gamesPlayed = 0,
+                 memory_size=10000):
         """
         Decides on action based on Neural Network.
         Method: Qlearning with Neural Network.
         :param action_dim: Size of action space: number of cards + 1 (draw)
         :epsilon: epsilon greedy, but not really implemented, this param will only change very first iteration
         """
+        self.memory = deque(maxlen=memory_size)
+        self.episode_states = []
+        self.episode_rewards = []
+        self.episode_dones = []
+
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
         else:
@@ -74,15 +81,23 @@ class ReinforcementAgent(Agent):
             action = self.get_action(gameInfo)
             finalState = False
 
-        if self.prevGameInfo != 0 and self.prevAction != -1:
+        if self.prevGameInfo != 0 and self.prevAction != None:
 
             self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
                 self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
 
+            self.remember(gameInfo['p_state'], action, reward, self.prevGameInfo['p_state'], finalState)
 
         self.prevAction = action
         self.prevGameInfo = gameInfo
         return action
+
+    def remember(self, st1, ac, rew, st2, don):
+        """Commit series to memory.
+        Selective memory: only memorize samples where prediction was worse than average.
+        This means the actual Q-values must be known.
+        """
+        self.memory.append([st1, ac, rew, st2, don])
 
     def get_action(self, game_info, random_Q=10):
         p_state = torch.Tensor(game_info['p_state']).to(self.device)
