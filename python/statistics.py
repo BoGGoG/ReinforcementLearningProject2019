@@ -10,7 +10,7 @@ from tqdm import tqdm
 numberOfGames = 400
 rollingMeanWindow = 200
 modelSavePath = 'save/savedModel.pwf'
-loadModel = False
+loadModel = True
 
 # -------------------------------------
 # SETUP
@@ -44,7 +44,7 @@ for i in tqdm(range(1, numberOfGames)):
     stepNumber = 0
 
     while not(finished):
-        currentGame = np.array([0,0])
+        currentGame = np.empty_like([0,0])
         action = arena.step()
         stepNumber += 1
         finished = (arena.agent_0_done and arena.agent_1_done)
@@ -55,7 +55,6 @@ for i in tqdm(range(1, numberOfGames)):
         if game_over:
             if reward == 100:
                 currentGame[player] += 1
-
 
     gamesHistory = np.vstack((gamesHistory, currentGame))
     stepsPerGame += stepNumber

@@ -62,7 +62,7 @@ class ReinforcementAgent(Agent):
             self.prevAction = -1
             self.prevGameInfo = 0
             self.gamesPlayed += 1
-            # print('RFL agent finished')
+            print('RFL agent finished with reward {}', gameInfo['reward'])
             return(-1)
         else:
             action = self.epsilonGreedyAction(gameInfo)
