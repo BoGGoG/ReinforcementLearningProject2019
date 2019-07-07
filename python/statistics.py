@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 400
+numberOfGames = 40
 rollingMeanWindow = 200
 modelSavePath = 'save/savedModel.pwf'
 loadModel = True
@@ -45,13 +45,13 @@ for i in tqdm(range(1, numberOfGames)):
 
     while not(finished):
         currentGame = np.empty_like([0,0])
-        action = arena.step()
         stepNumber += 1
         finished = (arena.agent_0_done and arena.agent_1_done)
         game_info = arena.get_game_info()
         game_over = game_info['game_over']
         player = game_info['turn']
         reward = game_info['reward']
+        action = arena.step()
         if game_over:
             if reward == 100:
                 currentGame[player] += 1

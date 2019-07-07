@@ -68,6 +68,7 @@ class Arena:
 
         # if both agents are done with this round, reset the game
         if self.agent_0_done and self.agent_1_done:
+            _ = agent.digest(self.game_info)
             self.game_info = self.game_env.reset()
             self.agent_0_done = False
             self.agent_1_done = False
@@ -75,6 +76,7 @@ class Arena:
 
         # give the current game info to the agent whose turn it is and get his action
         action = agent.digest(self.game_info)
+        # print('digest')
 
         # according to protocoll, the agent returns None as action when it is game over for him.
         if not action:
@@ -184,7 +186,7 @@ if __name__ == '__main__':
 
     # main loop
     # three rounds
-    for _ in range(1):
+    for _ in range(2):
         i = 0
         finished = False
         while not finished:
@@ -224,7 +226,3 @@ if __name__ == '__main__':
 
             print(output)
             i += 1
-
-
-
-
