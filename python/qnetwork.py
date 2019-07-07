@@ -26,8 +26,8 @@ class Policy(nn.Module):
         self.affine1 = nn.Linear(self.inputLength, hiddenLayerSize)
         # self.dropout = nn.Dropout(p = dropoutRate)
         self.affine2 = nn.Linear(hiddenLayerSize, self.outputLength)
-        self.optimizer = optim.Adam(self.parameters(), lr=5e-2)
-        self.criterion =  nn.SmoothL1Loss()
+        self.optimizer = optim.Adam(self.parameters(), lr=5e-3)
+        self.criterion = nn.SmoothL1Loss()
         self.gamma = 0.99
 
         self.saved_log_probs = []
@@ -36,11 +36,8 @@ class Policy(nn.Module):
     def forward(self, pState):
         """Feed game_info into network, get values for actions
         param: game_info: from unoengine
-        ToDo: rename game_info -> gameinfo
         """
-        pState = torch.Tensor(pState)
         pState = self.affine1(pState)
-        # pState = self.dropout(pState)
         pState = F.relu(pState)
         action_scores = self.affine2(pState)
         return F.softmax(action_scores, dim=-1)
@@ -85,7 +82,7 @@ class Policy(nn.Module):
 
         # self.saved_log_probs.append(m.log_prob(torch.scalar_tensor(action)))
         return action
-    
+
     def learn(self, oldpState, action, reward, newpState, finalState = False):
         """Minimize loss by backpropagation
         targetQs = reward + gamma * newStateQs

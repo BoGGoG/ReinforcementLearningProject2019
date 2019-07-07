@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 40
+numberOfGames = 4000
 rollingMeanWindow = 200
 modelSavePath = 'save/savedModel.pwf'
-loadModel = True
+loadModel = False
 
 # -------------------------------------
 # SETUP

@@ -36,8 +36,14 @@ class ReinforcementAgent(Agent):
         :param action_dim: Size of action space: number of cards + 1 (draw)
         :epsilon: epsilon greedy, but not really implemented, this param will only change very first iteration
         """
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        else:
+            self.device = torch.device('cpu')
+        print("Active device: ", self.device)
+
         self.action_dim = action_dim
-        self.policy = Policy(inputLength = action_dim + 1, outputLength = action_dim)
+        self.policy = Policy(inputLength=action_dim + 1, outputLength = action_dim).to(self.device)
         self.epsilon = epsilon
         self.prevGameInfo = prevGameInfo
         self.gamesPlayed = gamesPlayed
@@ -57,25 +63,36 @@ class ReinforcementAgent(Agent):
             self.epsilon = 1. / (self.gamesPlayed / 50. + 8.)
             action = None
             finalState = True
-            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]),
-                self.prevAction, reward, torch.Tensor(gameInfo["p_state"]), finalState)
+            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
+                              self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
             self.prevAction = -1
             self.prevGameInfo = 0
             self.gamesPlayed += 1
-            print('RFL agent finished with reward {}'.format(gameInfo['reward']))
-            return(-1)
+            # print('RFL agent finished with reward {}'.format(gameInfo['reward']))
+            return action
         else:
-            action = self.epsilonGreedyAction(gameInfo)
+            action = self.get_action(gameInfo)
             finalState = False
 
         if self.prevGameInfo != 0 and self.prevAction != -1:
-            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]),
-                self.prevAction, reward, torch.Tensor(gameInfo["p_state"]), finalState)
+
+            self.policy.learn(torch.Tensor(self.prevGameInfo["p_state"]).to(self.device),
+                self.prevAction, reward, torch.Tensor(gameInfo["p_state"]).to(self.device), finalState)
 
 
         self.prevAction = action
         self.prevGameInfo = gameInfo
-        return(action)
+        return action
+
+    def get_action(self, game_info, random_Q=10):
+        p_state = torch.Tensor(game_info['p_state']).to(self.device)
+        with torch.no_grad():
+            Qs = self.policy(p_state).cpu().numpy()
+        Qs += random_Q * np.random.rand(len(Qs))
+        legal_inds = np.argwhere(game_info['legal_actions']).flatten()
+        legal_Qs = Qs[legal_inds]
+        best_ind = legal_inds[legal_Qs.argmax()]
+        return best_ind
 
     def sampleAction(self, game_info):
         """random legal sample from categorical distribution (output of neural network).
@@ -87,7 +104,9 @@ class ReinforcementAgent(Agent):
 
     def greedyAction(self, game_info):
         "legal action with highest log prob"
-        action = self.policy.greedyAction(game_info['p_state'], game_info['legal_actions'])
+        p_state = torch.Tensor(game_info['p_state']).to(self.device)
+        legal_act = torch.Tensor(game_info['legal_actions']).to(self.device)
+        action = self.policy.greedyAction(p_state, legal_act)
         return action
 
     def epsilonGreedyAction(self, game_info):
