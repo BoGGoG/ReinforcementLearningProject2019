@@ -35,7 +35,7 @@ class RandomAgent(Agent):
 
 class ReinforcementAgent(Agent):
     def __init__(self, action_dim, epsilon=1., prevGameInfo = 0, prevAction = -1, gamesPlayed = 0,
-                 memory_size=50000):
+                 memory_size=50000, learning = True):
         """
         Decides on action based on Neural Network.
         Method: Qlearning with Neural Network.
@@ -57,6 +57,7 @@ class ReinforcementAgent(Agent):
         self.prevAction = None
         self.gamesPlayed = gamesPlayed
         self.discount = 0.99
+        self.learning = learning
 
         self.Q_std = 10000
         self.Q_mean = 0
@@ -78,6 +79,7 @@ class ReinforcementAgent(Agent):
         """
         # self.policy.rewards.append(gameInfo['reward']) # why?
         reward = gameInfo['reward']
+
         if gameInfo['game_over']:
             "game ended, make epsilon smaller"
             if self.gamesPlayed < 1000:
@@ -96,8 +98,12 @@ class ReinforcementAgent(Agent):
             # print('RFL agent finished with reward {}'.format(gameInfo['reward']))
             # return action
         else:
+            if not self.learning:
+                return(self.greedyAction(gameInfo))
+                final_state = False
+
             action = self.get_action(gameInfo, epsilon=.0, random_Q=(1-self.avg_win_rate)*self.Q_std*3)
-            action = self.epsilonGreedyAction(gameInfo)
+            # action = self.epsilonGreedyAction(gameInfo)
             final_state = False
 
         # if self.prevGameInfo != 0 and self.prevAction != None:
@@ -107,7 +113,7 @@ class ReinforcementAgent(Agent):
         if self.prevAction:
             self.remember(self.prevGameInfo['p_state'], self.prevAction, reward, gameInfo['p_state'], final_state)
 
-        if final_state:
+        if final_state and self.learning:
             self.fit_from_memory()
             self.openingState = True
 
@@ -203,7 +209,7 @@ class ReinforcementAgent(Agent):
             return np.random.choice(self.action_dim-1, p=p)
 
     def saveModel(self, path):
-        modelParams = { 
+        modelParams = {
                 'gamesPlayed':self.gamesPlayed,
                 'stateDict': self.policy.state_dict(),
                 'epsilon': self.epsilon,
