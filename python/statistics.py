@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 2000
+numberOfGames = 1000
 rollingMeanWindow = 500
 modelSavePath = 'save/savedModel.pwf'
 oldModelSavePath = 'save/oldSavedModel.pwf'
@@ -25,7 +25,7 @@ if loadModel:
 # agent_0 = RandomAgent(unoengine.get_action_dim())
     agent_0.saveModel(oldModelSavePath)
 agent_0.learning = learning
-agent_1 = RandomAgent(unoengine.get_action_dim())
+agent_1 = RandomAgent(unoengine.get_action_dim(), allowDraw = False)
 arena = Arena(agent_0, agent_1, unoengine)
 
 gamesHistory = np.array([0, 0])
