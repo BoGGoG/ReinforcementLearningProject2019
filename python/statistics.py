@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 20000
-rollingMeanWindow = 200
+numberOfGames = 6000
+rollingMeanWindow = 1000
 modelSavePath = 'save/savedModel.pwf'
+oldModelSavePath = 'save/oldSavedModel.pwf'
 loadModel = False
 
 # -------------------------------------
@@ -20,6 +21,7 @@ unoengine = UnoEngine()
 agent_0 = ReinforcementAgent(unoengine.get_action_dim())
 if loadModel:
     agent_0.loadModel(modelSavePath)
+    agent_0.saveModel(oldModelSavePath)
 # agent_0 = RandomAgent(unoengine.get_action_dim())
 agent_1 = RandomAgent(unoengine.get_action_dim())
 arena = Arena(agent_0, agent_1, unoengine)
