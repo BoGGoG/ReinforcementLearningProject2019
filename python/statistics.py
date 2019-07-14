@@ -7,12 +7,16 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 15000
-rollingMeanWindow = 5000
+# numberOfGames = 100000
+numberOfGames = 10000
+# numberOfGames = 15000
+rollingMeanWindow = 4000
 modelSavePath = 'save/savedModel.pwf'
 oldModelSavePath = 'save/oldSavedModel.pwf'
-loadModel = False
-learning = True
+# loadModel = False
+# learning = True
+loadModel = True
+learning = False
 
 # -------------------------------------
 # SETUP
@@ -28,19 +32,28 @@ agent_0.learning = learning
 agent_1 = RandomAgent(unoengine.get_action_dim(), allowDraw = False)
 arena = Arena(agent_0, agent_1, unoengine)
 
-gamesHistory = np.array([0, 0])
+# gamesHistory = np.array([0, 0])
+gamesHistory = np.zeros((numberOfGames, 2))
 stepsPerGame = 0
 
 print("Running statistics.py with loadModel = {} and learning = {}".format(loadModel, learning))
 
 def rollingMean(gamesHistory, windowSize = 100):
-    # get only 0th element (RFL)
+    """calculate rolling mean of player 0
+    :param gamesHistory: numpy array [[1,0],[0,1],...] of wins
+    :param windowSize
+    """
     gamesHistory = np.array(list(map(lambda row: row[0], gamesHistory)))
-    rollingMeanHistory = [0.]
+    rollingMeanHistory = np.empty(gamesHistory.shape[0] - windowSize + 1)
     for i in range(windowSize, gamesHistory.shape[0] + 1):
         windowMean = gamesHistory[i - windowSize:i].mean()
-        rollingMeanHistory.append(windowMean)
+        rollingMeanHistory[i - windowSize] = windowMean
     return(rollingMeanHistory)
+
+def totalMean(gamesHistory):
+    gamesHistory = np.array(list(map(lambda row: row[0], gamesHistory)))
+    return gamesHistory.mean()
+
 
 # ----------------------------------------------------------------
 # Play many games, train, collect data, plot
@@ -60,9 +73,8 @@ for i in tqdm(range(1, numberOfGames)):
         action = arena.step()
         if game_over:
             if reward == 100:
-                currentGame[player] += 1
+                gamesHistory[i][player] += 1
 
-    gamesHistory = np.vstack((gamesHistory, currentGame))
     stepsPerGame += stepNumber
     if (i+1) % 1000 == 0:
         print("{} episodes finished".format(i+1))
@@ -74,9 +86,12 @@ for i in tqdm(range(1, numberOfGames)):
 agent_0.saveModel(modelSavePath)
 stepsPerGame = stepsPerGame / numberOfGames
 rollingMeanHistory = rollingMean(gamesHistory, rollingMeanWindow)
+axes = plt.gca()
+axes.set_ylim([0.3, 0.65])
 plt.plot(rollingMeanHistory)
-plt.title("Games Won rolling mean ({})\ngames played total = {} \nwin rate of last {} games {}:".format(rollingMeanWindow,
-    agent_0.gamesPlayed, rollingMeanWindow, rollingMeanHistory[-1]))
+plt.axhline(y = 0.5, color = 'gray', linestyle = 'dashed')
+plt.title("Games Won rolling mean ({}) while learning = {}\ngames played total: {} \nwin rate of last {} games: {}\nTotal win rate: {}:".format(rollingMeanWindow,
+    learning, agent_0.gamesPlayed, rollingMeanWindow, rollingMeanHistory[-1], totalMean(gamesHistory)))
 plt.xlabel("games played (+{})".format(rollingMeanWindow))
 plt.ylabel("win rate")
 plt.show()
