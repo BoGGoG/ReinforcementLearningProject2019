@@ -12,7 +12,7 @@ class RandomAgent(Agent):
     def __init__(self, action_dim, allowDraw = False):
         self.action_dim = action_dim
         self.allowDraw = allowDraw
-        self.drawAllower = -1 if allowDraw else action_dim
+        self.drawAllower = -1 if not(allowDraw) else action_dim
 
     def digest(self, game_info):
         if game_info['game_over']:
@@ -30,7 +30,10 @@ class RandomAgent(Agent):
         else:
             p = game_info['legal_actions'][0:self.drawAllower]
             p = p / p.sum()
-            return np.random.choice(len(p), p=p)
+            action = np.random.choice(len(p), p=p)
+            if DEBUG and action == self.action_dim - 1:
+                print('random agent draws')
+            return action
 
 
 class ReinforcementAgent(Agent):
@@ -99,8 +102,9 @@ class ReinforcementAgent(Agent):
             # return action
         else:
             if not self.learning:
-                return(self.greedyAction(gameInfo))
+                action = self.get_action(gameInfo, epsilon = .0, random_Q = 0 )
                 final_state = False
+                return action
 
             action = self.get_action(gameInfo, epsilon=.0, random_Q=(1-self.avg_win_rate)*self.Q_std*3)
             # action = self.epsilonGreedyAction(gameInfo)

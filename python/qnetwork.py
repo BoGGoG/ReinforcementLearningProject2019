@@ -9,7 +9,7 @@ from torch.distributions import Categorical
 import numpy as np
 
 dropoutRate = 0.6
-hiddenLayerSizes = [1024]
+hiddenLayerSizes = [6, 6]
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
@@ -28,7 +28,7 @@ class Policy(nn.Module):
         # self.affine2 = nn.Linear(hiddenLayerSizes[0], hiddenLayerSizes[1])
         self.last_affine = nn.Linear(hiddenLayerSizes[0], self.outputLength)
 
-        self.dropout = nn.Dropout(p=dropoutRate)
+        # self.dropout = nn.Dropout(p=dropoutRate)
         # self.optimizer = optim.Adam(self.parameters(), lr=1e-3)
         self.optimizer = optim.SGD(self.parameters(), lr=0.001, momentum=0.9)
         self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=1000, gamma=0.9)
@@ -45,8 +45,8 @@ class Policy(nn.Module):
         pState = self.affine1(pState)
         # pState = self.dropout(pState)
         pState = F.relu(pState)
-        #pState = self.affine2(pState)
-        #pState = F.relu(pState)
+        # pState = self.affine2(pState)
+        # pState = F.relu(pState)
         Qs = self.last_affine(pState)
         return Qs
 

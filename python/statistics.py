@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 1000
-rollingMeanWindow = 500
+numberOfGames = 15000
+rollingMeanWindow = 5000
 modelSavePath = 'save/savedModel.pwf'
 oldModelSavePath = 'save/oldSavedModel.pwf'
-loadModel = True
-learning = False
+loadModel = False
+learning = True
 
 # -------------------------------------
 # SETUP
@@ -30,6 +30,8 @@ arena = Arena(agent_0, agent_1, unoengine)
 
 gamesHistory = np.array([0, 0])
 stepsPerGame = 0
+
+print("Running statistics.py with loadModel = {} and learning = {}".format(loadModel, learning))
 
 def rollingMean(gamesHistory, windowSize = 100):
     # get only 0th element (RFL)
@@ -73,7 +75,9 @@ agent_0.saveModel(modelSavePath)
 stepsPerGame = stepsPerGame / numberOfGames
 rollingMeanHistory = rollingMean(gamesHistory, rollingMeanWindow)
 plt.plot(rollingMeanHistory)
-plt.title("Games Won rolling mean ({})\ngamesPlayed = {}".format(rollingMeanWindow, agent_0.gamesPlayed))
-plt.xlabel("games played")
+plt.title("Games Won rolling mean ({})\ngames played total = {} \nwin rate of last {} games {}:".format(rollingMeanWindow,
+    agent_0.gamesPlayed, rollingMeanWindow, rollingMeanHistory[-1]))
+plt.xlabel("games played (+{})".format(rollingMeanWindow))
 plt.ylabel("win rate")
 plt.show()
+plt.savefig('save/lastPlot.png')
