@@ -10,7 +10,7 @@ import numpy as np
 
 dropoutRate = 0.5
 # hiddenLayerSizes = [6, 6]
-hiddenLayerSizes = [564, 200, 4]
+hiddenLayerSizes = [564, 200, 5]
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
