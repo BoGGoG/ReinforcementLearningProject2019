@@ -1,3 +1,6 @@
+"""Play random agent vs random agent in order to find out how much
+influence going first has
+"""
 from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 from arena import Arena
