@@ -4,14 +4,15 @@ influence going first has
 from unoengine import UnoEngine
 from agents import RandomAgent, ReinforcementAgent
 from arena import Arena
+from statisticsHelpers import rollingMean, totalMean
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-numberOfGames = 20000
-rollingMeanWindow = 4000
+numberOfGames = 5000
+rollingMeanWindow = 2000
 
 # -------------------------------------
 # SETUP
@@ -19,29 +20,13 @@ rollingMeanWindow = 4000
 
 unoengine = UnoEngine()
 agent_0 = RandomAgent(unoengine.get_action_dim(), allowDraw = False)
-agent_1 = RandomAgent(unoengine.get_action_dim(), allowDraw = False)
+agent_1 = RandomAgent(unoengine.get_action_dim(), allowDraw = True)
 arena = Arena(agent_0, agent_1, unoengine)
 
 gamesHistory = np.zeros((numberOfGames, 2))
 stepsPerGame = 0
 
 print("Running statistics.py with random agent vs random agent")
-
-def rollingMean(gamesHistory, windowSize = 100):
-    """calculate rolling mean of player 0
-    :param gamesHistory: numpy array [[1,0],[0,1],...] of wins
-    :param windowSize
-    """
-    gamesHistory = np.array(list(map(lambda row: row[0], gamesHistory)))
-    rollingMeanHistory = np.empty(gamesHistory.shape[0] - windowSize + 1)
-    for i in range(windowSize, gamesHistory.shape[0] + 1):
-        windowMean = gamesHistory[i - windowSize:i].mean()
-        rollingMeanHistory[i - windowSize] = windowMean
-    return(rollingMeanHistory)
-
-def totalMean(gamesHistory):
-    gamesHistory = np.array(list(map(lambda row: row[0], gamesHistory)))
-    return gamesHistory.mean()
 
 # ----------------------------------------------------------------
 # Play many games, train, collect data, plot
@@ -69,7 +54,7 @@ for i in tqdm(range(1, numberOfGames)):
 stepsPerGame = stepsPerGame / numberOfGames
 rollingMeanHistory = rollingMean(gamesHistory, rollingMeanWindow)
 axes = plt.gca()
-axes.set_ylim([0.3, 0.65])
+axes.set_ylim([0.3, 1.0])
 plt.plot(rollingMeanHistory)
 plt.axhline(y = 0.5, color = 'gray', linestyle = 'dashed')
 plt.title("Random vs Random, going first: rolling mean window: {} , Total win rate: {}:".format(rollingMeanWindow, totalMean(gamesHistory)))

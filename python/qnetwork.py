@@ -9,8 +9,7 @@ from torch.distributions import Categorical
 import numpy as np
 
 dropoutRate = 0.5
-# hiddenLayerSizes = [6, 6]
-hiddenLayerSizes = [564, 200, 5]
+hiddenLayerSizes = [564, 200, 4]
 
 class Policy(nn.Module):
     def __init__(self, inputLength, outputLength):
